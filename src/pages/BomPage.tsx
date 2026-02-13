@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CircuitBoard, Plus, Pencil, Trash2, FileText, Download, Upload, ClipboardList, Package, Copy } from 'lucide-react';
+import { CircuitBoard, Plus, Pencil, Trash2, FileText, Download, Upload, ClipboardList, Package, Copy, Factory } from 'lucide-react';
 import { BomDetail } from '@/components/BomDetail';
 import { BomCsvImportDialog } from '@/components/BomCsvImportDialog';
 import { Link, useLocation } from 'react-router-dom';
@@ -88,6 +88,9 @@ const BomPage = () => {
               <Link to="/bom" className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-foreground">
                 <ClipboardList className="h-4 w-4 text-primary" /> Stücklisten
               </Link>
+              <Link to="/production" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                <Factory className="h-4 w-4" /> Produktion
+              </Link>
             </nav>
           </div>
         </header>
@@ -100,6 +103,10 @@ const BomPage = () => {
           <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
             <ClipboardList className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Stücklisten</span>
+          </Link>
+          <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+            <Factory className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Produktion</span>
           </Link>
         </nav>
         <main className="container py-4 md:py-8">
@@ -119,28 +126,35 @@ const BomPage = () => {
               Bauteil<span className="text-primary">Verwaltung</span>
             </h1>
           </div>
-          <nav className="hidden md:flex items-center gap-1">
-            <Link to="/" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              <Package className="h-4 w-4" /> Bauteile
-            </Link>
-            <Link to="/bom" className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-foreground">
-              <ClipboardList className="h-4 w-4 text-primary" /> Stücklisten
-            </Link>
-          </nav>
+            <nav className="hidden md:flex items-center gap-1">
+              <Link to="/" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                <Package className="h-4 w-4" /> Bauteile
+              </Link>
+              <Link to="/bom" className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-foreground">
+                <ClipboardList className="h-4 w-4 text-primary" /> Stücklisten
+              </Link>
+              <Link to="/production" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                <Factory className="h-4 w-4" /> Produktion
+              </Link>
+            </nav>
         </div>
       </header>
 
       {/* Mobile bottom navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
-        <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
-          <Package className="h-5 w-5" />
-          <span className="font-display text-[10px] font-medium">Bauteile</span>
-        </Link>
-        <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
-          <ClipboardList className="h-5 w-5" />
-          <span className="font-display text-[10px] font-medium">Stücklisten</span>
-        </Link>
-      </nav>
+        <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
+          <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+            <Package className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Bauteile</span>
+          </Link>
+          <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
+            <ClipboardList className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Stücklisten</span>
+          </Link>
+          <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+            <Factory className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Produktion</span>
+          </Link>
+        </nav>
 
       <main className="container py-4 md:py-8">
         <section className="mb-4 flex items-center justify-between">
