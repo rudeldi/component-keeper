@@ -102,6 +102,7 @@ export type Database = {
           min_quantity: number | null
           name: string
           package: string
+          purchase_url: string | null
           quantity: number
           type: string
           updated_at: string
@@ -119,6 +120,7 @@ export type Database = {
           min_quantity?: number | null
           name: string
           package?: string
+          purchase_url?: string | null
           quantity?: number
           type?: string
           updated_at?: string
@@ -136,6 +138,7 @@ export type Database = {
           min_quantity?: number | null
           name?: string
           package?: string
+          purchase_url?: string | null
           quantity?: number
           type?: string
           updated_at?: string

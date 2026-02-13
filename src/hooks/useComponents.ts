@@ -19,6 +19,7 @@ function rowToComponent(row: any): ElectronicComponent {
     location: row.location ?? undefined,
     barcode: row.barcode ?? undefined,
     datasheetUrl: row.datasheet_url ?? undefined,
+    purchaseUrl: row.purchase_url ?? undefined,
     manufacturer: row.manufacturer ?? undefined,
     description: row.description ?? undefined,
     createdAt: row.created_at,
@@ -39,6 +40,7 @@ function componentToRow(c: Omit<ElectronicComponent, 'id' | 'createdAt' | 'updat
     location: c.location || null,
     barcode: c.barcode || null,
     datasheet_url: c.datasheetUrl || null,
+    purchase_url: c.purchaseUrl || null,
     manufacturer: c.manufacturer || null,
     description: c.description || null,
   };
@@ -111,6 +113,7 @@ export function useComponents() {
     if (updates.location !== undefined) dbUpdates.location = updates.location || null;
     if (updates.barcode !== undefined) dbUpdates.barcode = updates.barcode || null;
     if (updates.datasheetUrl !== undefined) dbUpdates.datasheet_url = updates.datasheetUrl || null;
+    if (updates.purchaseUrl !== undefined) dbUpdates.purchase_url = updates.purchaseUrl || null;
     if (updates.manufacturer !== undefined) dbUpdates.manufacturer = updates.manufacturer || null;
     if (updates.description !== undefined) dbUpdates.description = updates.description || null;
 

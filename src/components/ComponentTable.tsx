@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Pencil, Trash2, ExternalLink, AlertTriangle, ClipboardList, Package } from 'lucide-react';
+import { Pencil, Trash2, ExternalLink, AlertTriangle, ClipboardList, Package, ShoppingCart } from 'lucide-react';
 import { useBomLists, useBomItems } from '@/hooks/useBom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from '@/hooks/use-toast';
@@ -171,6 +171,13 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
                         <ExternalLink className="h-3.5 w-3.5" />
                       </a>
                     )}
+                    {comp.purchaseUrl && (
+                      <a href={comp.purchaseUrl} target="_blank" rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary shrink-0"
+                        onClick={e => e.stopPropagation()}>
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                      </a>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                     <Badge variant="secondary" className="font-display text-[10px]">
@@ -248,6 +255,12 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
                         <a href={comp.datasheetUrl} target="_blank" rel="noopener noreferrer"
                           className="text-muted-foreground hover:text-primary">
                           <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                      {comp.purchaseUrl && (
+                        <a href={comp.purchaseUrl} target="_blank" rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-primary">
+                          <ShoppingCart className="h-3.5 w-3.5" />
                         </a>
                       )}
                     </div>

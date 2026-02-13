@@ -10,6 +10,7 @@ export interface ElectronicComponent {
   location?: string;
   barcode?: string;
   datasheetUrl?: string;
+  purchaseUrl?: string;
   manufacturer?: string;
   description?: string;
   createdAt: string;

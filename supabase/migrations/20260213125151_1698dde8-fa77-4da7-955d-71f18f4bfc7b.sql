@@ -1,0 +1,1 @@
+ALTER TABLE public.components ADD COLUMN purchase_url TEXT DEFAULT NULL;
