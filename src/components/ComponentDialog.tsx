@@ -54,14 +54,14 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg w-[calc(100vw-2rem)]">
         <DialogHeader>
           <DialogTitle className="font-display text-primary">
             {initial ? 'Bauteil bearbeiten' : 'Neues Bauteil anlegen'}
           </DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-3 sm:gap-4 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label>Kategorie *</Label>
               <Select value={category} onValueChange={(v) => { setCategory(v as ComponentCategory); setType(''); }}>
@@ -91,7 +91,7 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="z.B. 10kΩ 1% 0603" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label>Wert</Label>
               <Input value={value} onChange={e => setValue(e.target.value)} placeholder="z.B. 10kΩ, 100nF" />
@@ -114,7 +114,7 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label>Menge</Label>
               <Input type="number" min="0" value={quantity} onChange={e => setQuantity(e.target.value)} />
@@ -123,7 +123,7 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
               <Label>Mindestmenge</Label>
               <Input type="number" min="0" value={minQuantity} onChange={e => setMinQuantity(e.target.value)} placeholder="Optional" />
             </div>
-            <div className="space-y-2">
+            <div className="col-span-2 sm:col-span-1 space-y-2">
               <Label>Lagerort</Label>
               <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="z.B. Regal A3" />
             </div>

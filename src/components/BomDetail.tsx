@@ -145,25 +145,25 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="h-5 w-5" />
+      <div className="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8 md:h-9 md:w-9">
+            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
-          <div>
-            <h2 className="font-display text-lg font-bold text-foreground">{bom.name}</h2>
+          <div className="min-w-0">
+            <h2 className="font-display text-base md:text-lg font-bold text-foreground truncate">{bom.name}</h2>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="font-display text-xs">{bom.version}</Badge>
-              {bom.description && <p className="text-sm text-muted-foreground">{bom.description}</p>}
+              <Badge variant="outline" className="font-display text-[10px] md:text-xs">{bom.version}</Badge>
+              {bom.description && <p className="text-xs md:text-sm text-muted-foreground truncate">{bom.description}</p>}
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 pl-10 sm:pl-0">
           {bom.schematicUrl ? (
             <>
               <Button variant="outline" size="sm" onClick={() => setSchematicPreview(true)} className="gap-1.5">
                 <FileImage className="h-4 w-4" />
-                Schaltplan
+                <span className="hidden sm:inline">Schaltplan</span>
               </Button>
               <Button variant="outline" size="sm" onClick={handleRemoveSchematic} className="gap-1.5 text-destructive hover:text-destructive">
                 <X className="h-4 w-4" />
@@ -172,17 +172,18 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
           ) : (
             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="gap-1.5">
               <ImagePlus className="h-4 w-4" />
-              {uploading ? 'Lädt...' : 'Schaltplan'}
+              <span className="hidden sm:inline">{uploading ? 'Lädt...' : 'Schaltplan'}</span>
             </Button>
           )}
           <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleSchematicUpload} />
           <Button variant="outline" size="sm" onClick={() => exportBomCsv(bom, items)} className="gap-1.5">
             <Download className="h-4 w-4" />
-            Export
+            <span className="hidden sm:inline">Export</span>
           </Button>
           <Button size="sm" onClick={() => setAddDialogOpen(true)} className="gap-1.5">
             <Plus className="h-4 w-4" />
-            Bauteil hinzufügen
+            <span className="hidden sm:inline">Bauteil hinzufügen</span>
+            <span className="sm:hidden">Hinzufügen</span>
           </Button>
         </div>
       </div>
@@ -221,82 +222,146 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
           <p className="mt-1 text-sm text-muted-foreground">Füge Bauteile aus deinem Bestand hinzu.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="font-display">Bezeichnung</TableHead>
-                <TableHead className="font-display">Kategorie</TableHead>
-                <TableHead className="font-display">Bauform</TableHead>
-                <TableHead className="font-display text-right">Benötigt</TableHead>
-                <TableHead className="font-display text-right">Bestand</TableHead>
-                <TableHead className="font-display">Status</TableHead>
-                <TableHead className="font-display">Referenz</TableHead>
-                <TableHead className="font-display">Notiz</TableHead>
-                <TableHead className="font-display text-right">Aktionen</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map(item => {
-                const c = item.component;
-                const cat = c ? CATEGORIES.find(ct => ct.id === c.category) : null;
-                const stock = c?.quantity ?? 0;
-                const needed = item.quantity;
-                const isOk = stock >= needed;
-                const isPartial = !isOk && stock > 0;
-                const isMissing = stock === 0;
-                return (
-                  <TableRow key={item.id} className="group">
-                    <TableCell className="font-medium">{c?.name || '–'}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="font-display text-xs">
-                        {cat?.label || c?.category || '–'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="font-display text-xs">{c?.package || '–'}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-display font-semibold">{needed}</TableCell>
-                    <TableCell className={`text-right font-display font-semibold ${isMissing ? 'text-destructive' : isPartial ? 'text-[hsl(var(--warning))]' : 'text-[hsl(var(--success))]'}`}>
-                      {stock}
-                    </TableCell>
-                    <TableCell>
+        <>
+          {/* Mobile card layout */}
+          <div className="flex flex-col gap-2 md:hidden">
+            {items.map(item => {
+              const c = item.component;
+              const cat = c ? CATEGORIES.find(ct => ct.id === c.category) : null;
+              const stock = c?.quantity ?? 0;
+              const needed = item.quantity;
+              const isOk = stock >= needed;
+              const isPartial = !isOk && stock > 0;
+              const isMissing = stock === 0;
+              return (
+                <div key={item.id} className="rounded-lg border border-border bg-card p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <span className="font-medium text-sm text-foreground">{c?.name || '–'}</span>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                        <Badge variant="secondary" className="font-display text-[10px]">{cat?.label || c?.category || '–'}</Badge>
+                        {c?.package && <Badge variant="outline" className="font-display text-[10px]">{c.package}</Badge>}
+                        {item.referenceDesignator && <span className="text-[10px] text-muted-foreground">Ref: {item.referenceDesignator}</span>}
+                      </div>
+                      {item.note && <p className="text-[10px] text-muted-foreground mt-1">{item.note}</p>}
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-display text-xs text-muted-foreground">×{needed}</span>
+                        <span className={`font-display text-sm font-bold ${isMissing ? 'text-destructive' : isPartial ? 'text-[hsl(var(--warning))]' : 'text-[hsl(var(--success))]'}`}>
+                          {stock}
+                        </span>
+                      </div>
                       {isOk ? (
-                        <div className="flex items-center gap-1 text-[hsl(var(--success))]">
-                          <CheckCircle2 className="h-4 w-4" />
-                          <span className="text-xs font-medium">OK</span>
+                        <div className="flex items-center gap-0.5 text-[hsl(var(--success))]">
+                          <CheckCircle2 className="h-3 w-3" />
+                          <span className="text-[10px] font-medium">OK</span>
                         </div>
                       ) : isPartial ? (
-                        <div className="flex items-center gap-1 text-[hsl(var(--warning))]">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-xs font-medium">−{needed - stock}</span>
+                        <div className="flex items-center gap-0.5 text-[hsl(var(--warning))]">
+                          <AlertTriangle className="h-3 w-3" />
+                          <span className="text-[10px] font-medium">−{needed - stock}</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 text-destructive">
-                          <XCircle className="h-4 w-4" />
-                          <span className="text-xs font-medium">Fehlt</span>
+                        <div className="flex items-center gap-0.5 text-destructive">
+                          <XCircle className="h-3 w-3" />
+                          <span className="text-[10px] font-medium">Fehlt</span>
                         </div>
                       )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{item.referenceDesignator || '–'}</TableCell>
-                    <TableCell className="text-muted-foreground">{item.note || '–'}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(item)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => setDeleteItemId(item.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-1 mt-2 border-t border-border pt-2">
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(item)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => setDeleteItemId(item.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-border">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="font-display">Bezeichnung</TableHead>
+                  <TableHead className="font-display">Kategorie</TableHead>
+                  <TableHead className="font-display">Bauform</TableHead>
+                  <TableHead className="font-display text-right">Benötigt</TableHead>
+                  <TableHead className="font-display text-right">Bestand</TableHead>
+                  <TableHead className="font-display">Status</TableHead>
+                  <TableHead className="font-display">Referenz</TableHead>
+                  <TableHead className="font-display">Notiz</TableHead>
+                  <TableHead className="font-display text-right">Aktionen</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map(item => {
+                  const c = item.component;
+                  const cat = c ? CATEGORIES.find(ct => ct.id === c.category) : null;
+                  const stock = c?.quantity ?? 0;
+                  const needed = item.quantity;
+                  const isOk = stock >= needed;
+                  const isPartial = !isOk && stock > 0;
+                  const isMissing = stock === 0;
+                  return (
+                    <TableRow key={item.id} className="group">
+                      <TableCell className="font-medium">{c?.name || '–'}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="font-display text-xs">
+                          {cat?.label || c?.category || '–'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-display text-xs">{c?.package || '–'}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-display font-semibold">{needed}</TableCell>
+                      <TableCell className={`text-right font-display font-semibold ${isMissing ? 'text-destructive' : isPartial ? 'text-[hsl(var(--warning))]' : 'text-[hsl(var(--success))]'}`}>
+                        {stock}
+                      </TableCell>
+                      <TableCell>
+                        {isOk ? (
+                          <div className="flex items-center gap-1 text-[hsl(var(--success))]">
+                            <CheckCircle2 className="h-4 w-4" />
+                            <span className="text-xs font-medium">OK</span>
+                          </div>
+                        ) : isPartial ? (
+                          <div className="flex items-center gap-1 text-[hsl(var(--warning))]">
+                            <AlertTriangle className="h-4 w-4" />
+                            <span className="text-xs font-medium">−{needed - stock}</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 text-destructive">
+                            <XCircle className="h-4 w-4" />
+                            <span className="text-xs font-medium">Fehlt</span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{item.referenceDesignator || '–'}</TableCell>
+                      <TableCell className="text-muted-foreground">{item.note || '–'}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(item)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => setDeleteItemId(item.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </>
       )}
 
       {/* Add item dialog */}
