@@ -108,7 +108,10 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
           </Button>
           <div>
             <h2 className="font-display text-lg font-bold text-foreground">{bom.name}</h2>
-            {bom.description && <p className="text-sm text-muted-foreground">{bom.description}</p>}
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="font-display text-xs">{bom.version}</Badge>
+              {bom.description && <p className="text-sm text-muted-foreground">{bom.description}</p>}
+            </div>
           </div>
         </div>
         <div className="flex gap-2">

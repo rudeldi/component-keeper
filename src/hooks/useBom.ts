@@ -6,6 +6,7 @@ export interface BomList {
   id: string;
   name: string;
   description?: string;
+  version: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -26,6 +27,7 @@ function rowToBomList(row: any): BomList {
     id: row.id,
     name: row.name,
     description: row.description ?? undefined,
+    version: row.version ?? 'v1.0',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -90,10 +92,10 @@ export function useBomLists() {
     return () => { supabase.removeChannel(channel); };
   }, [fetchLists]);
 
-  const addBomList = useCallback(async (name: string, description?: string) => {
+  const addBomList = useCallback(async (name: string, description?: string, version?: string) => {
     const { data } = await supabase
       .from('bom_lists')
-      .insert({ name, description: description || null })
+      .insert({ name, description: description || null, version: version || 'v1.0' })
       .select()
       .single();
     if (data) {
@@ -103,10 +105,11 @@ export function useBomLists() {
     }
   }, []);
 
-  const updateBomList = useCallback(async (id: string, updates: { name?: string; description?: string }) => {
+  const updateBomList = useCallback(async (id: string, updates: { name?: string; description?: string; version?: string }) => {
     const dbUpdates: Record<string, any> = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.description !== undefined) dbUpdates.description = updates.description || null;
+    if (updates.version !== undefined) dbUpdates.version = updates.version;
     await supabase.from('bom_lists').update(dbUpdates).eq('id', id);
     setBomLists(prev => prev.map(b => b.id === id ? { ...b, ...updates, updatedAt: new Date().toISOString() } : b));
   }, []);
@@ -116,7 +119,37 @@ export function useBomLists() {
     setBomLists(prev => prev.filter(b => b.id !== id));
   }, []);
 
-  return { bomLists, loading, addBomList, updateBomList, deleteBomList };
+  const duplicateBomList = useCallback(async (id: string, newVersion: string) => {
+    const source = bomLists.find(b => b.id === id);
+    if (!source) return;
+    // Create new list with new version
+    const { data: newListData } = await supabase
+      .from('bom_lists')
+      .insert({ name: source.name, description: source.description || null, version: newVersion })
+      .select()
+      .single();
+    if (!newListData) return;
+    // Copy all items
+    const { data: sourceItems } = await supabase
+      .from('bom_items')
+      .select('*')
+      .eq('bom_id', id);
+    if (sourceItems && sourceItems.length > 0) {
+      const newItems = sourceItems.map(item => ({
+        bom_id: newListData.id,
+        component_id: item.component_id,
+        quantity: item.quantity,
+        reference_designator: item.reference_designator,
+        note: item.note,
+      }));
+      await supabase.from('bom_items').insert(newItems);
+    }
+    const newList = rowToBomList(newListData);
+    setBomLists(prev => [newList, ...prev]);
+    return newList;
+  }, [bomLists]);
+
+  return { bomLists, loading, addBomList, updateBomList, deleteBomList, duplicateBomList };
 }
 
 export function useBomItems(bomId: string | null) {

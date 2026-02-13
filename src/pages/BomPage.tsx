@@ -2,46 +2,70 @@ import { useState } from 'react';
 import { useBomLists } from '@/hooks/useBom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CircuitBoard, Plus, Pencil, Trash2, FileText, Download, Upload, ClipboardList, Package } from 'lucide-react';
+import { CircuitBoard, Plus, Pencil, Trash2, FileText, Download, Upload, ClipboardList, Package, Copy } from 'lucide-react';
 import { BomDetail } from '@/components/BomDetail';
 import { BomCsvImportDialog } from '@/components/BomCsvImportDialog';
 import { Link, useLocation } from 'react-router-dom';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 
 const BomPage = () => {
-  const { bomLists, addBomList, updateBomList, deleteBomList } = useBomLists();
+  const { bomLists, addBomList, updateBomList, deleteBomList, duplicateBomList } = useBomLists();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [version, setVersion] = useState('v1.0');
   const [selectedBomId, setSelectedBomId] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
+  const [duplicateSourceId, setDuplicateSourceId] = useState<string | null>(null);
+  const [duplicateVersion, setDuplicateVersion] = useState('');
 
   const handleNew = () => {
     setEditId(null);
     setName('');
     setDescription('');
+    setVersion('v1.0');
     setDialogOpen(true);
   };
 
-  const handleEdit = (bom: { id: string; name: string; description?: string }) => {
+  const handleEdit = (bom: { id: string; name: string; description?: string; version: string }) => {
     setEditId(bom.id);
     setName(bom.name);
     setDescription(bom.description || '');
+    setVersion(bom.version);
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
     if (!name.trim()) return;
     if (editId) {
-      await updateBomList(editId, { name: name.trim(), description: description.trim() || undefined });
+      await updateBomList(editId, { name: name.trim(), description: description.trim() || undefined, version: version.trim() || undefined });
     } else {
-      await addBomList(name.trim(), description.trim() || undefined);
+      await addBomList(name.trim(), description.trim() || undefined, version.trim() || undefined);
     }
     setDialogOpen(false);
+  };
+
+  const handleDuplicate = (bom: { id: string; version: string }) => {
+    setDuplicateSourceId(bom.id);
+    const parts = bom.version.match(/^(v?)(\d+)\.(\d+)$/);
+    if (parts) {
+      setDuplicateVersion(`${parts[1]}${parts[2]}.${parseInt(parts[3]) + 1}`);
+    } else {
+      setDuplicateVersion(bom.version + '.1');
+    }
+    setDuplicateDialogOpen(true);
+  };
+
+  const handleDuplicateConfirm = async () => {
+    if (!duplicateSourceId || !duplicateVersion.trim()) return;
+    await duplicateBomList(duplicateSourceId, duplicateVersion.trim());
+    setDuplicateDialogOpen(false);
   };
 
   const selectedBom = bomLists.find(b => b.id === selectedBomId);
@@ -125,6 +149,7 @@ const BomPage = () => {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="font-display">Name</TableHead>
+                  <TableHead className="font-display">Version</TableHead>
                   <TableHead className="font-display">Beschreibung</TableHead>
                   <TableHead className="font-display">Erstellt</TableHead>
                   <TableHead className="font-display text-right">Aktionen</TableHead>
@@ -139,12 +164,20 @@ const BomPage = () => {
                         {bom.name}
                       </div>
                     </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-display text-xs">{bom.version}</Badge>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{bom.description || '–'}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {new Date(bom.createdAt).toLocaleDateString('de-DE')}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                        <Button size="icon" variant="ghost" className="h-8 w-8"
+                          onClick={e => { e.stopPropagation(); handleDuplicate(bom); }}
+                          title="Duplizieren">
+                          <Copy className="h-4 w-4" />
+                        </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8"
                           onClick={e => { e.stopPropagation(); handleEdit(bom); }}>
                           <Pencil className="h-4 w-4" />
@@ -179,6 +212,10 @@ const BomPage = () => {
               <label className="text-sm font-medium">Beschreibung</label>
               <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Optional" />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Version</label>
+              <Input value={version} onChange={e => setVersion(e.target.value)} placeholder="z.B. v1.0" />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Abbrechen</Button>
@@ -188,6 +225,26 @@ const BomPage = () => {
       </Dialog>
 
       <BomCsvImportDialog open={importOpen} onOpenChange={setImportOpen} />
+
+      {/* Duplicate dialog */}
+      <Dialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-primary">Stückliste duplizieren</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Neue Version *</label>
+              <Input value={duplicateVersion} onChange={e => setDuplicateVersion(e.target.value)} placeholder="z.B. v1.1" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDuplicateDialogOpen(false)}>Abbrechen</Button>
+            <Button onClick={handleDuplicateConfirm} disabled={!duplicateVersion.trim()}>Duplizieren</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <ConfirmDeleteDialog
         open={!!deleteId}
         onOpenChange={open => { if (!open) setDeleteId(null); }}
