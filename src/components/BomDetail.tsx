@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BomList, BomItem, useBomItems } from '@/hooks/useBom';
 import { useComponents } from '@/hooks/useComponents';
 import { CATEGORIES } from '@/data/constants';
@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Plus, Trash2, Download, Pencil } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Download, Pencil, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 
 interface BomDetailProps {
   bom: BomList;
@@ -84,6 +84,19 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
     setNote(item.note || '');
   };
 
+  // Stock check summary
+  const stockStatus = useMemo(() => {
+    let ok = 0, low = 0, missing = 0;
+    items.forEach(item => {
+      const c = item.component;
+      if (!c) { missing++; return; }
+      if (c.quantity >= item.quantity) ok++;
+      else if (c.quantity > 0) low++;
+      else missing++;
+    });
+    return { ok, low, missing, total: items.length };
+  }, [items]);
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -108,6 +121,34 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
         </div>
       </div>
 
+      {/* Stock check summary */}
+      {items.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-3">
+          <div className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-sm">
+            <span className="font-display font-semibold text-foreground">{stockStatus.total}</span>
+            <span className="text-muted-foreground">Positionen</span>
+          </div>
+          {stockStatus.ok > 0 && (
+            <div className="flex items-center gap-1.5 rounded-md bg-[hsl(var(--success))/0.1] px-3 py-1.5 text-sm text-[hsl(var(--success))]">
+              <CheckCircle2 className="h-4 w-4" />
+              <span className="font-display font-medium">{stockStatus.ok} verfügbar</span>
+            </div>
+          )}
+          {stockStatus.low > 0 && (
+            <div className="flex items-center gap-1.5 rounded-md bg-[hsl(var(--warning))/0.1] px-3 py-1.5 text-sm text-[hsl(var(--warning))]">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="font-display font-medium">{stockStatus.low} teilweise</span>
+            </div>
+          )}
+          {stockStatus.missing > 0 && (
+            <div className="flex items-center gap-1.5 rounded-md bg-destructive/10 px-3 py-1.5 text-sm text-destructive">
+              <XCircle className="h-4 w-4" />
+              <span className="font-display font-medium">{stockStatus.missing} fehlen</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16">
           <p className="font-display text-muted-foreground">Keine Bauteile in dieser Stückliste</p>
@@ -121,7 +162,9 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
                 <TableHead className="font-display">Bezeichnung</TableHead>
                 <TableHead className="font-display">Kategorie</TableHead>
                 <TableHead className="font-display">Bauform</TableHead>
-                <TableHead className="font-display text-right">Menge</TableHead>
+                <TableHead className="font-display text-right">Benötigt</TableHead>
+                <TableHead className="font-display text-right">Bestand</TableHead>
+                <TableHead className="font-display">Status</TableHead>
                 <TableHead className="font-display">Referenz</TableHead>
                 <TableHead className="font-display">Notiz</TableHead>
                 <TableHead className="font-display text-right">Aktionen</TableHead>
@@ -131,6 +174,11 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
               {items.map(item => {
                 const c = item.component;
                 const cat = c ? CATEGORIES.find(ct => ct.id === c.category) : null;
+                const stock = c?.quantity ?? 0;
+                const needed = item.quantity;
+                const isOk = stock >= needed;
+                const isPartial = !isOk && stock > 0;
+                const isMissing = stock === 0;
                 return (
                   <TableRow key={item.id} className="group">
                     <TableCell className="font-medium">{c?.name || '–'}</TableCell>
@@ -142,7 +190,28 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
                     <TableCell>
                       <Badge variant="outline" className="font-display text-xs">{c?.package || '–'}</Badge>
                     </TableCell>
-                    <TableCell className="text-right font-display font-semibold">{item.quantity}</TableCell>
+                    <TableCell className="text-right font-display font-semibold">{needed}</TableCell>
+                    <TableCell className={`text-right font-display font-semibold ${isMissing ? 'text-destructive' : isPartial ? 'text-[hsl(var(--warning))]' : 'text-[hsl(var(--success))]'}`}>
+                      {stock}
+                    </TableCell>
+                    <TableCell>
+                      {isOk ? (
+                        <div className="flex items-center gap-1 text-[hsl(var(--success))]">
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span className="text-xs font-medium">OK</span>
+                        </div>
+                      ) : isPartial ? (
+                        <div className="flex items-center gap-1 text-[hsl(var(--warning))]">
+                          <AlertTriangle className="h-4 w-4" />
+                          <span className="text-xs font-medium">−{needed - stock}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-destructive">
+                          <XCircle className="h-4 w-4" />
+                          <span className="text-xs font-medium">Fehlt</span>
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{item.referenceDesignator || '–'}</TableCell>
                     <TableCell className="text-muted-foreground">{item.note || '–'}</TableCell>
                     <TableCell className="text-right">
