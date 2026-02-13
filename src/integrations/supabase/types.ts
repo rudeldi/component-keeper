@@ -143,6 +143,86 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_locations: {
+        Row: {
+          component_id: string
+          created_at: string
+          id: string
+          location: string
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          component_id: string
+          created_at?: string
+          id?: string
+          location?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          component_id?: string
+          created_at?: string
+          id?: string
+          location?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_locations_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          component_id: string
+          created_at: string
+          id: string
+          movement_type: string
+          note: string | null
+          quantity_change: number
+          stock_location_id: string | null
+        }
+        Insert: {
+          component_id: string
+          created_at?: string
+          id?: string
+          movement_type?: string
+          note?: string | null
+          quantity_change: number
+          stock_location_id?: string | null
+        }
+        Update: {
+          component_id?: string
+          created_at?: string
+          id?: string
+          movement_type?: string
+          note?: string | null
+          quantity_change?: number
+          stock_location_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_stock_location_id_fkey"
+            columns: ["stock_location_id"]
+            isOneToOne: false
+            referencedRelation: "stock_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
