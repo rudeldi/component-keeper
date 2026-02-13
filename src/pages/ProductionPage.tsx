@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { CircuitBoard, Package, ClipboardList, Factory, AlertTriangle, CheckCircle2, History, Trash2, MapPin } from 'lucide-react';
+import { CircuitBoard, Package, ClipboardList, Factory, AlertTriangle, CheckCircle2, History, Trash2, MapPin, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -210,6 +210,9 @@ const ProductionPage = () => {
             <Link to="/production" className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-foreground">
               <Factory className="h-4 w-4 text-primary" /> Produktion
             </Link>
+            <Link to="/stats" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <BarChart3 className="h-4 w-4" /> Statistik
+            </Link>
           </nav>
         </div>
       </header>
@@ -226,6 +229,10 @@ const ProductionPage = () => {
         <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
           <Factory className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Produktion</span>
+        </Link>
+        <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <BarChart3 className="h-5 w-5" />
+          <span className="font-display text-[10px] font-medium">Statistik</span>
         </Link>
       </nav>
 

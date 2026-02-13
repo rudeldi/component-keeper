@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CircuitBoard, Plus, Pencil, Trash2, FileText, Download, Upload, ClipboardList, Package, Copy, Factory } from 'lucide-react';
+import { CircuitBoard, Plus, Pencil, Trash2, FileText, Download, Upload, ClipboardList, Package, Copy, Factory, BarChart3 } from 'lucide-react';
 import { BomDetail } from '@/components/BomDetail';
 import { BomCsvImportDialog } from '@/components/BomCsvImportDialog';
 import { Link, useLocation } from 'react-router-dom';
@@ -91,6 +91,9 @@ const BomPage = () => {
               <Link to="/production" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 <Factory className="h-4 w-4" /> Produktion
               </Link>
+              <Link to="/stats" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                <BarChart3 className="h-4 w-4" /> Statistik
+              </Link>
             </nav>
           </div>
         </header>
@@ -107,6 +110,10 @@ const BomPage = () => {
           <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
             <Factory className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Produktion</span>
+          </Link>
+          <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+            <BarChart3 className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Statistik</span>
           </Link>
         </nav>
         <main className="container py-4 md:py-8">
@@ -136,6 +143,9 @@ const BomPage = () => {
               <Link to="/production" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 <Factory className="h-4 w-4" /> Produktion
               </Link>
+              <Link to="/stats" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                <BarChart3 className="h-4 w-4" /> Statistik
+              </Link>
             </nav>
         </div>
       </header>
@@ -153,6 +163,10 @@ const BomPage = () => {
           <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
             <Factory className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Produktion</span>
+          </Link>
+          <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+            <BarChart3 className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Statistik</span>
           </Link>
         </nav>
 
