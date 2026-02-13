@@ -7,6 +7,7 @@ export interface BomList {
   name: string;
   description?: string;
   version: string;
+  schematicUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,6 +29,7 @@ function rowToBomList(row: any): BomList {
     name: row.name,
     description: row.description ?? undefined,
     version: row.version ?? 'v1.0',
+    schematicUrl: row.schematic_url ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -105,11 +107,12 @@ export function useBomLists() {
     }
   }, []);
 
-  const updateBomList = useCallback(async (id: string, updates: { name?: string; description?: string; version?: string }) => {
+  const updateBomList = useCallback(async (id: string, updates: { name?: string; description?: string; version?: string; schematicUrl?: string | null }) => {
     const dbUpdates: Record<string, any> = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.description !== undefined) dbUpdates.description = updates.description || null;
     if (updates.version !== undefined) dbUpdates.version = updates.version;
+    if (updates.schematicUrl !== undefined) dbUpdates.schematic_url = updates.schematicUrl;
     await supabase.from('bom_lists').update(dbUpdates).eq('id', id);
     setBomLists(prev => prev.map(b => b.id === id ? { ...b, ...updates, updatedAt: new Date().toISOString() } : b));
   }, []);

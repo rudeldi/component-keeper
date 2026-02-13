@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { BomList, BomItem, useBomItems } from '@/hooks/useBom';
+import { useState, useMemo, useRef } from 'react';
+import { BomList, BomItem, useBomItems, useBomLists } from '@/hooks/useBom';
 import { useComponents } from '@/hooks/useComponents';
 import { CATEGORIES } from '@/data/constants';
 import { Button } from '@/components/ui/button';
@@ -8,8 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Plus, Trash2, Download, Pencil, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Download, Pencil, CheckCircle2, AlertTriangle, XCircle, ImagePlus, FileImage, X, ExternalLink } from 'lucide-react';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface BomDetailProps {
   bom: BomList;
@@ -46,6 +48,7 @@ function exportBomCsv(bom: BomList, items: BomItem[]) {
 
 export function BomDetail({ bom, onBack }: BomDetailProps) {
   const { items, addItem, updateItem, removeItem } = useBomItems(bom.id);
+  const { updateBomList } = useBomLists();
   const { components } = useComponents();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedComponentId, setSelectedComponentId] = useState('');
@@ -54,6 +57,47 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
   const [note, setNote] = useState('');
   const [editItem, setEditItem] = useState<BomItem | null>(null);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [schematicPreview, setSchematicPreview] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSchematicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Nur Bilder (PNG, JPG, SVG, WebP) oder PDF erlaubt.');
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `${bom.id}/schematic.${ext}`;
+    // Remove old file if exists
+    if (bom.schematicUrl) {
+      const oldPath = bom.schematicUrl.split('/schematics/')[1];
+      if (oldPath) await supabase.storage.from('schematics').remove([oldPath]);
+    }
+    const { error } = await supabase.storage.from('schematics').upload(path, file, { upsert: true });
+    if (error) {
+      toast.error('Upload fehlgeschlagen: ' + error.message);
+      setUploading(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from('schematics').getPublicUrl(path);
+    await updateBomList(bom.id, { schematicUrl: urlData.publicUrl });
+    toast.success('Schaltplan hochgeladen');
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleRemoveSchematic = async () => {
+    if (bom.schematicUrl) {
+      const oldPath = bom.schematicUrl.split('/schematics/')[1];
+      if (oldPath) await supabase.storage.from('schematics').remove([oldPath]);
+    }
+    await updateBomList(bom.id, { schematicUrl: null });
+    toast.success('Schaltplan entfernt');
+  };
 
   const availableComponents = components.filter(
     c => !items.some(i => i.componentId === c.id)
@@ -114,7 +158,24 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {bom.schematicUrl ? (
+            <>
+              <Button variant="outline" size="sm" onClick={() => setSchematicPreview(true)} className="gap-1.5">
+                <FileImage className="h-4 w-4" />
+                Schaltplan
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleRemoveSchematic} className="gap-1.5 text-destructive hover:text-destructive">
+                <X className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="gap-1.5">
+              <ImagePlus className="h-4 w-4" />
+              {uploading ? 'Lädt...' : 'Schaltplan'}
+            </Button>
+          )}
+          <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleSchematicUpload} />
           <Button variant="outline" size="sm" onClick={() => exportBomCsv(bom, items)} className="gap-1.5">
             <Download className="h-4 w-4" />
             Export
@@ -316,6 +377,37 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
         title="Position entfernen?"
         description="Das Bauteil wird aus dieser Stückliste entfernt."
       />
+
+      {/* Schematic preview dialog */}
+      <Dialog open={schematicPreview} onOpenChange={setSchematicPreview}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="font-display text-primary flex items-center gap-2">
+              <FileImage className="h-5 w-5" />
+              Schaltplan – {bom.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {bom.schematicUrl?.endsWith('.pdf') ? (
+              <div className="flex flex-col items-center gap-4">
+                <p className="text-sm text-muted-foreground">PDF-Schaltplan</p>
+                <a href={bom.schematicUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="gap-1.5">
+                    <ExternalLink className="h-4 w-4" />
+                    PDF öffnen
+                  </Button>
+                </a>
+              </div>
+            ) : (
+              <img
+                src={bom.schematicUrl}
+                alt="Schaltplan"
+                className="w-full rounded-lg border border-border object-contain max-h-[70vh]"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
