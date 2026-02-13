@@ -143,6 +143,38 @@ export type Database = {
         }
         Relationships: []
       }
+      production_runs: {
+        Row: {
+          bom_id: string
+          bom_name: string
+          created_at: string
+          id: string
+          quantity: number
+        }
+        Insert: {
+          bom_id: string
+          bom_name: string
+          created_at?: string
+          id?: string
+          quantity: number
+        }
+        Update: {
+          bom_id?: string
+          bom_name?: string
+          created_at?: string
+          id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_runs_bom_id_fkey"
+            columns: ["bom_id"]
+            isOneToOne: false
+            referencedRelation: "bom_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_locations: {
         Row: {
           component_id: string

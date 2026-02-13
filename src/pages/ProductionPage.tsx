@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useBomLists, useBomItems } from '@/hooks/useBom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { CircuitBoard, Package, ClipboardList, Factory, AlertTriangle, CheckCircle2, ScanBarcode } from 'lucide-react';
+import { CircuitBoard, Package, ClipboardList, Factory, AlertTriangle, CheckCircle2, ScanBarcode, History, Trash2 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
 
 const ProductionPage = () => {
   const { bomLists, loading: listsLoading } = useBomLists();
@@ -21,6 +23,29 @@ const ProductionPage = () => {
   const [result, setResult] = useState<{ success: boolean; message: string; details?: string[] } | null>(null);
   const { toast } = useToast();
   const location = useLocation();
+
+  // Production history
+  interface ProductionRun {
+    id: string;
+    bom_id: string;
+    bom_name: string;
+    quantity: number;
+    created_at: string;
+  }
+  const [history, setHistory] = useState<ProductionRun[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+
+  const fetchHistory = useCallback(async () => {
+    const { data } = await supabase
+      .from('production_runs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (data) setHistory(data as ProductionRun[]);
+    setHistoryLoading(false);
+  }, []);
+
+  useEffect(() => { fetchHistory(); }, [fetchHistory]);
 
   const selectedBom = bomLists.find(b => b.id === selectedBomId);
 
@@ -116,6 +141,14 @@ const ProductionPage = () => {
         details: [...errors, ...successes],
       });
     } else {
+      // Log production run
+      await supabase.from('production_runs').insert({
+        bom_id: selectedBomId,
+        bom_name: `${selectedBom?.name} (${selectedBom?.version})`,
+        quantity,
+      });
+      await fetchHistory();
+
       setResult({
         success: true,
         message: `${quantity}× ${selectedBom?.name} ${selectedBom?.version} erfolgreich produziert!`,
@@ -290,7 +323,55 @@ const ProductionPage = () => {
                 <span className={`font-medium text-sm ${result.success ? 'text-primary' : 'text-destructive'}`}>
                   {result.message}
                 </span>
-              </div>
+        </div>
+
+        {/* Production History */}
+        <div className="mt-10 space-y-3">
+          <h3 className="font-display text-sm md:text-base font-semibold text-foreground flex items-center gap-2">
+            <History className="h-4 w-4 text-primary" />
+            Produktionshistorie
+          </h3>
+          {history.length === 0 && !historyLoading ? (
+            <p className="text-sm text-muted-foreground">Noch keine Produktionsläufe vorhanden.</p>
+          ) : (
+            <div className="rounded-lg border border-border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-display text-xs">Datum</TableHead>
+                    <TableHead className="font-display text-xs">Stückliste</TableHead>
+                    <TableHead className="font-display text-xs text-right">Menge</TableHead>
+                    <TableHead className="font-display text-xs text-right w-10"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {history.map(run => (
+                    <TableRow key={run.id}>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {format(new Date(run.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}
+                      </TableCell>
+                      <TableCell className="text-sm font-medium">{run.bom_name}</TableCell>
+                      <TableCell className="text-sm text-right font-mono">{run.quantity}×</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          onClick={async () => {
+                            await supabase.from('production_runs').delete().eq('id', run.id);
+                            fetchHistory();
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
               {result.details && (
                 <ul className="space-y-0.5 text-xs text-muted-foreground ml-7">
                   {result.details.map((d, i) => (
