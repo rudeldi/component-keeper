@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      bom_items: {
+        Row: {
+          bom_id: string
+          component_id: string
+          created_at: string
+          id: string
+          note: string | null
+          quantity: number
+          reference_designator: string | null
+        }
+        Insert: {
+          bom_id: string
+          component_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          quantity?: number
+          reference_designator?: string | null
+        }
+        Update: {
+          bom_id?: string
+          component_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          quantity?: number
+          reference_designator?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bom_items_bom_id_fkey"
+            columns: ["bom_id"]
+            isOneToOne: false
+            referencedRelation: "bom_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bom_items_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bom_lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       components: {
         Row: {
           barcode: string | null
