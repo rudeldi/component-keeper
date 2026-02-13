@@ -11,6 +11,7 @@ import { Pencil, Trash2, ExternalLink, AlertTriangle, ClipboardList } from 'luci
 import { useBomLists, useBomItems } from '@/hooks/useBom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from '@/hooks/use-toast';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 
 interface ComponentTableProps {
   components: ElectronicComponent[];
@@ -88,6 +89,7 @@ function AddToBomDialog({ component, open, onOpenChange }: {
 
 export function ComponentTable({ components, onEdit, onDelete }: ComponentTableProps) {
   const [bomTarget, setBomTarget] = useState<ElectronicComponent | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ElectronicComponent | null>(null);
 
   if (components.length === 0) {
     return (
@@ -162,7 +164,7 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => onDelete(comp.id)}>
+                        onClick={() => setDeleteTarget(comp)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -178,6 +180,13 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
         component={bomTarget}
         open={!!bomTarget}
         onOpenChange={open => { if (!open) setBomTarget(null); }}
+      />
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={open => { if (!open) setDeleteTarget(null); }}
+        onConfirm={() => { if (deleteTarget) { onDelete(deleteTarget.id); setDeleteTarget(null); } }}
+        title={`"${deleteTarget?.name}" löschen?`}
+        description="Das Bauteil wird unwiderruflich gelöscht und aus allen Stücklisten entfernt."
       />
     </>
   );

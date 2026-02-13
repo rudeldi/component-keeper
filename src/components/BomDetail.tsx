@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Plus, Trash2, Download, Pencil, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 
 interface BomDetailProps {
   bom: BomList;
@@ -52,6 +53,7 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
   const [refDes, setRefDes] = useState('');
   const [note, setNote] = useState('');
   const [editItem, setEditItem] = useState<BomItem | null>(null);
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
 
   const availableComponents = components.filter(
     c => !items.some(i => i.componentId === c.id)
@@ -220,7 +222,7 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => removeItem(item.id)}>
+                          onClick={() => setDeleteItemId(item.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -303,6 +305,14 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDeleteDialog
+        open={!!deleteItemId}
+        onOpenChange={open => { if (!open) setDeleteItemId(null); }}
+        onConfirm={() => { if (deleteItemId) { removeItem(deleteItemId); setDeleteItemId(null); } }}
+        title="Position entfernen?"
+        description="Das Bauteil wird aus dieser Stückliste entfernt."
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { CircuitBoard, Plus, Pencil, Trash2, FileText, Download, Upload, Clipboa
 import { BomDetail } from '@/components/BomDetail';
 import { BomCsvImportDialog } from '@/components/BomCsvImportDialog';
 import { Link, useLocation } from 'react-router-dom';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 
 const BomPage = () => {
   const { bomLists, addBomList, updateBomList, deleteBomList } = useBomLists();
@@ -17,6 +18,7 @@ const BomPage = () => {
   const [description, setDescription] = useState('');
   const [selectedBomId, setSelectedBomId] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const handleNew = () => {
     setEditId(null);
@@ -148,7 +150,7 @@ const BomPage = () => {
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={e => { e.stopPropagation(); deleteBomList(bom.id); }}>
+                          onClick={e => { e.stopPropagation(); setDeleteId(bom.id); }}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -186,6 +188,13 @@ const BomPage = () => {
       </Dialog>
 
       <BomCsvImportDialog open={importOpen} onOpenChange={setImportOpen} />
+      <ConfirmDeleteDialog
+        open={!!deleteId}
+        onOpenChange={open => { if (!open) setDeleteId(null); }}
+        onConfirm={() => { if (deleteId) { deleteBomList(deleteId); setDeleteId(null); } }}
+        title="Stückliste löschen?"
+        description="Die Stückliste und alle zugeordneten Positionen werden unwiderruflich gelöscht."
+      />
     </div>
   );
 };
