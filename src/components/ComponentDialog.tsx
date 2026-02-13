@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ElectronicComponent, ComponentCategory } from '@/types/component';
 import { CATEGORIES, ALL_PACKAGES, COMPONENT_TYPES } from '@/data/constants';
 import {
@@ -18,20 +18,39 @@ interface ComponentDialogProps {
 }
 
 export function ComponentDialog({ open, onOpenChange, onSave, initial }: ComponentDialogProps) {
-  const [category, setCategory] = useState<ComponentCategory>(initial?.category || 'resistors');
-  const [name, setName] = useState(initial?.name || '');
-  const [type, setType] = useState(initial?.type || '');
-  const [value, setValue] = useState(initial?.value || '');
-  const [pkg, setPkg] = useState(initial?.package || '');
-  const [quantity, setQuantity] = useState(initial?.quantity?.toString() || '0');
-  const [minQuantity, setMinQuantity] = useState(initial?.minQuantity?.toString() || '');
-  const [location, setLocation] = useState(initial?.location || '');
-  const [barcode, setBarcode] = useState(initial?.barcode || '');
-  const [datasheetUrl, setDatasheetUrl] = useState(initial?.datasheetUrl || '');
-  const [purchaseUrl, setPurchaseUrl] = useState(initial?.purchaseUrl || '');
-  const [unitPrice, setUnitPrice] = useState(initial?.unitPrice?.toString() || '');
-  const [manufacturer, setManufacturer] = useState(initial?.manufacturer || '');
-  const [description, setDescription] = useState(initial?.description || '');
+  const [category, setCategory] = useState<ComponentCategory>('resistors');
+  const [name, setName] = useState('');
+  const [type, setType] = useState('');
+  const [value, setValue] = useState('');
+  const [pkg, setPkg] = useState('');
+  const [quantity, setQuantity] = useState('0');
+  const [minQuantity, setMinQuantity] = useState('');
+  const [location, setLocation] = useState('');
+  const [barcode, setBarcode] = useState('');
+  const [datasheetUrl, setDatasheetUrl] = useState('');
+  const [purchaseUrl, setPurchaseUrl] = useState('');
+  const [unitPrice, setUnitPrice] = useState('');
+  const [manufacturer, setManufacturer] = useState('');
+  const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      setCategory(initial?.category || 'resistors');
+      setName(initial?.name || '');
+      setType(initial?.type || '');
+      setValue(initial?.value || '');
+      setPkg(initial?.package || '');
+      setQuantity(initial?.quantity?.toString() || '0');
+      setMinQuantity(initial?.minQuantity?.toString() || '');
+      setLocation(initial?.location || '');
+      setBarcode(initial?.barcode || '');
+      setDatasheetUrl(initial?.datasheetUrl || '');
+      setPurchaseUrl(initial?.purchaseUrl || '');
+      setUnitPrice(initial?.unitPrice?.toString() || '');
+      setManufacturer(initial?.manufacturer || '');
+      setDescription(initial?.description || '');
+    }
+  }, [open, initial]);
 
   const types = COMPONENT_TYPES[category] || [];
 
