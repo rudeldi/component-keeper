@@ -78,17 +78,17 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen pcb-grid">
+    <div className="min-h-screen pcb-grid pb-20 md:pb-0">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <CircuitBoard className="h-7 w-7 text-primary" />
-            <h1 className="font-display text-xl font-bold tracking-tight text-foreground">
+        <div className="container flex items-center justify-between py-3 md:py-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <CircuitBoard className="h-6 w-6 md:h-7 md:w-7 text-primary" />
+            <h1 className="font-display text-base md:text-xl font-bold tracking-tight text-foreground">
               Bauteil<span className="text-primary">Verwaltung</span>
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3">
             {lowStockCount > 0 && (
               <div className="flex items-center gap-1.5 rounded-md bg-destructive/10 px-3 py-1.5 text-sm text-destructive">
                 <AlertTriangle className="h-4 w-4" />
@@ -101,7 +101,7 @@ const Index = () => {
               <span className="text-sm text-muted-foreground">Bauteile</span>
             </div>
           </div>
-          <nav className="flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1">
             <Link to="/" className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-foreground">
               <Package className="h-4 w-4 text-primary" /> Bauteile
             </Link>
@@ -109,42 +109,72 @@ const Index = () => {
               <ClipboardList className="h-4 w-4" /> Stücklisten
             </Link>
           </nav>
+          {/* Mobile stats */}
+          <div className="flex sm:hidden items-center gap-2">
+            <div className="flex items-center gap-1 rounded-md bg-secondary px-2 py-1">
+              <Package className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="font-display text-xs font-semibold text-foreground">{components.length}</span>
+            </div>
+            {lowStockCount > 0 && (
+              <div className="flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-1 text-destructive">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                <span className="font-display text-xs font-medium">{lowStockCount}</span>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      <main className="container py-8">
+      {/* Mobile bottom navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
+        <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
+          <Package className="h-5 w-5" />
+          <span className="font-display text-[10px] font-medium">Bauteile</span>
+        </Link>
+        <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <ClipboardList className="h-5 w-5" />
+          <span className="font-display text-[10px] font-medium">Stücklisten</span>
+        </Link>
+        <button onClick={() => setScannerOpen(true)} className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <ScanBarcode className="h-5 w-5" />
+          <span className="font-display text-[10px] font-medium">Scan</span>
+        </button>
+      </nav>
+
+      <main className="container py-4 md:py-8">
         {/* Category Grid */}
-        <section className="mb-8">
-          <h2 className="mb-4 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        <section className="mb-4 md:mb-8">
+          <h2 className="mb-3 md:mb-4 font-display text-xs md:text-sm font-semibold uppercase tracking-widest text-muted-foreground">
             Kategorien
           </h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 sm:gap-3">
             {CATEGORIES.map(cat => (
               <CategoryCard
                 key={cat.id}
                 categoryId={cat.id}
                 count={categoryCounts[cat.id] || 0}
                 onClick={() => handleCategoryClick(cat.id)}
+                active={filterCategory === cat.id}
               />
             ))}
           </div>
         </section>
 
         {/* Toolbar */}
-        <section className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-1 gap-3">
+        <section className="mb-4 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 gap-2 sm:gap-3">
             <div className="relative flex-1 sm:max-w-xs">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Suchen..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-9"
+                className="pl-9 h-9"
               />
             </div>
             <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-44">
-                <SelectValue placeholder="Alle Kategorien" />
+              <SelectTrigger className="w-32 sm:w-44 h-9">
+                <SelectValue placeholder="Alle" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle Kategorien</SelectItem>
@@ -154,22 +184,23 @@ const Index = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setScannerOpen(true)} className="gap-1.5">
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => setScannerOpen(true)} className="gap-1.5 hidden sm:flex">
               <ScanBarcode className="h-4 w-4" />
-              Scan
+              <span className="hidden lg:inline">Scan</span>
             </Button>
             <Button variant="outline" size="sm" onClick={() => setImportOpen(true)} className="gap-1.5">
               <Upload className="h-4 w-4" />
-              Import
+              <span className="hidden sm:inline">Import</span>
             </Button>
             <Button variant="outline" size="sm" onClick={() => downloadCsv(filteredComponents)} className="gap-1.5">
               <Download className="h-4 w-4" />
-              Export
+              <span className="hidden sm:inline">Export</span>
             </Button>
-            <Button onClick={() => setDialogOpen(true)} className="gap-2">
+            <Button onClick={() => setDialogOpen(true)} className="gap-1.5 sm:gap-2" size="sm">
               <Plus className="h-4 w-4" />
-              Bauteil anlegen
+              <span className="hidden sm:inline">Bauteil anlegen</span>
+              <span className="sm:hidden">Neu</span>
             </Button>
           </div>
         </section>

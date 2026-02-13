@@ -72,16 +72,16 @@ const BomPage = () => {
 
   if (selectedBom) {
     return (
-      <div className="min-h-screen pcb-grid">
+      <div className="min-h-screen pcb-grid pb-20 md:pb-0">
         <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
-          <div className="container flex items-center justify-between py-4">
-            <div className="flex items-center gap-3">
-              <CircuitBoard className="h-7 w-7 text-primary" />
-              <h1 className="font-display text-xl font-bold tracking-tight text-foreground">
+          <div className="container flex items-center justify-between py-3 md:py-4">
+            <div className="flex items-center gap-2 md:gap-3">
+              <CircuitBoard className="h-6 w-6 md:h-7 md:w-7 text-primary" />
+              <h1 className="font-display text-base md:text-xl font-bold tracking-tight text-foreground">
                 Bauteil<span className="text-primary">Verwaltung</span>
               </h1>
             </div>
-            <nav className="flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1">
               <Link to="/" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 <Package className="h-4 w-4" /> Bauteile
               </Link>
@@ -91,7 +91,18 @@ const BomPage = () => {
             </nav>
           </div>
         </header>
-        <main className="container py-8">
+        {/* Mobile bottom navigation */}
+        <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
+          <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+            <Package className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Bauteile</span>
+          </Link>
+          <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
+            <ClipboardList className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Stücklisten</span>
+          </Link>
+        </nav>
+        <main className="container py-4 md:py-8">
           <BomDetail bom={selectedBom} onBack={() => setSelectedBomId(null)} />
         </main>
       </div>
@@ -99,16 +110,16 @@ const BomPage = () => {
   }
 
   return (
-    <div className="min-h-screen pcb-grid">
+    <div className="min-h-screen pcb-grid pb-20 md:pb-0">
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <CircuitBoard className="h-7 w-7 text-primary" />
-            <h1 className="font-display text-xl font-bold tracking-tight text-foreground">
+        <div className="container flex items-center justify-between py-3 md:py-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <CircuitBoard className="h-6 w-6 md:h-7 md:w-7 text-primary" />
+            <h1 className="font-display text-base md:text-xl font-bold tracking-tight text-foreground">
               Bauteil<span className="text-primary">Verwaltung</span>
             </h1>
           </div>
-          <nav className="flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1">
             <Link to="/" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               <Package className="h-4 w-4" /> Bauteile
             </Link>
@@ -119,20 +130,33 @@ const BomPage = () => {
         </div>
       </header>
 
-      <main className="container py-8">
+      {/* Mobile bottom navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
+        <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <Package className="h-5 w-5" />
+          <span className="font-display text-[10px] font-medium">Bauteile</span>
+        </Link>
+        <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
+          <ClipboardList className="h-5 w-5" />
+          <span className="font-display text-[10px] font-medium">Stücklisten</span>
+        </Link>
+      </nav>
+
+      <main className="container py-4 md:py-8">
         <section className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
+          <h2 className="font-display text-base md:text-lg font-semibold text-foreground flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
             Stücklisten
           </h2>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setImportOpen(true)} className="gap-1.5">
               <Upload className="h-4 w-4" />
-              Import
+              <span className="hidden sm:inline">Import</span>
             </Button>
-            <Button onClick={handleNew} className="gap-2">
+            <Button onClick={handleNew} size="sm" className="gap-1.5 sm:gap-2">
               <Plus className="h-4 w-4" />
-              Neue Stückliste
+              <span className="hidden sm:inline">Neue Stückliste</span>
+              <span className="sm:hidden">Neu</span>
             </Button>
           </div>
         </section>
@@ -144,55 +168,95 @@ const BomPage = () => {
             <p className="mt-1 text-sm text-muted-foreground">Erstelle deine erste Stückliste.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="font-display">Name</TableHead>
-                  <TableHead className="font-display">Version</TableHead>
-                  <TableHead className="font-display">Beschreibung</TableHead>
-                  <TableHead className="font-display">Erstellt</TableHead>
-                  <TableHead className="font-display text-right">Aktionen</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bomLists.map(bom => (
-                  <TableRow key={bom.id} className="group cursor-pointer" onClick={() => setSelectedBomId(bom.id)}>
-                    <TableCell className="font-medium">
+          <>
+            {/* Mobile card layout */}
+            <div className="flex flex-col gap-2 md:hidden">
+              {bomLists.map(bom => (
+                <div key={bom.id} className="rounded-lg border border-border bg-card p-3" onClick={() => setSelectedBomId(bom.id)}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary" />
-                        {bom.name}
+                        <FileText className="h-4 w-4 text-primary shrink-0" />
+                        <span className="font-medium text-sm text-foreground truncate">{bom.name}</span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="font-display text-xs">{bom.version}</Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{bom.description || '–'}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <Badge variant="outline" className="font-display text-[10px]">{bom.version}</Badge>
+                        {bom.description && <span className="text-xs text-muted-foreground truncate">{bom.description}</span>}
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0">
                       {new Date(bom.createdAt).toLocaleDateString('de-DE')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Button size="icon" variant="ghost" className="h-8 w-8"
-                          onClick={e => { e.stopPropagation(); handleDuplicate(bom); }}
-                          title="Duplizieren">
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8"
-                          onClick={e => { e.stopPropagation(); handleEdit(bom); }}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={e => { e.stopPropagation(); setDeleteId(bom.id); }}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    </span>
+                  </div>
+                  <div className="flex justify-end gap-1 mt-2 border-t border-border pt-2">
+                    <Button size="icon" variant="ghost" className="h-8 w-8"
+                      onClick={e => { e.stopPropagation(); handleDuplicate(bom); }}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8"
+                      onClick={e => { e.stopPropagation(); handleEdit(bom); }}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={e => { e.stopPropagation(); setDeleteId(bom.id); }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto rounded-lg border border-border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-display">Name</TableHead>
+                    <TableHead className="font-display">Version</TableHead>
+                    <TableHead className="font-display">Beschreibung</TableHead>
+                    <TableHead className="font-display">Erstellt</TableHead>
+                    <TableHead className="font-display text-right">Aktionen</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {bomLists.map(bom => (
+                    <TableRow key={bom.id} className="group cursor-pointer" onClick={() => setSelectedBomId(bom.id)}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-primary" />
+                          {bom.name}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-display text-xs">{bom.version}</Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{bom.description || '–'}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(bom.createdAt).toLocaleDateString('de-DE')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                          <Button size="icon" variant="ghost" className="h-8 w-8"
+                            onClick={e => { e.stopPropagation(); handleDuplicate(bom); }}
+                            title="Duplizieren">
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8"
+                            onClick={e => { e.stopPropagation(); handleEdit(bom); }}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={e => { e.stopPropagation(); setDeleteId(bom.id); }}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </main>
 

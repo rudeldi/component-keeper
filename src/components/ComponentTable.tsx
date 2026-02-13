@@ -102,7 +102,65 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
 
   return (
     <>
-      <div className="overflow-x-auto rounded-lg border border-border">
+      {/* Mobile card layout */}
+      <div className="flex flex-col gap-2 md:hidden">
+        {components.map(comp => {
+          const cat = CATEGORIES.find(c => c.id === comp.category);
+          const isLow = comp.minQuantity != null && comp.quantity <= comp.minQuantity;
+          return (
+            <div key={comp.id} className="rounded-lg border border-border bg-card p-3" onClick={() => onEdit(comp)}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm text-foreground truncate">{comp.name}</span>
+                    {comp.datasheetUrl && (
+                      <a href={comp.datasheetUrl} target="_blank" rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary shrink-0"
+                        onClick={e => e.stopPropagation()}>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                    <Badge variant="secondary" className="font-display text-[10px]">
+                      {cat?.label || comp.category}
+                    </Badge>
+                    {comp.value && <span className="font-display text-xs text-accent-foreground">{comp.value}</span>}
+                    {comp.package && <Badge variant="outline" className="font-display text-[10px]">{comp.package}</Badge>}
+                    {comp.location && <span className="text-[10px] text-muted-foreground">📍 {comp.location}</span>}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <span className={`font-display text-lg font-bold ${isLow ? 'text-destructive' : 'text-foreground'}`}>
+                    {comp.quantity}
+                  </span>
+                  {isLow && (
+                    <span className="flex items-center gap-0.5 text-destructive">
+                      <AlertTriangle className="h-3 w-3" />
+                      <span className="text-[10px] font-medium">Niedrig</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end gap-1 mt-2 border-t border-border pt-2">
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={e => { e.stopPropagation(); setBomTarget(comp); }}>
+                  <ClipboardList className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={e => { e.stopPropagation(); onEdit(comp); }}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                  onClick={e => { e.stopPropagation(); setDeleteTarget(comp); }}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop table layout */}
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-border">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
