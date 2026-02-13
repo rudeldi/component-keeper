@@ -1,0 +1,1 @@
+ALTER TABLE public.bom_lists ADD COLUMN version text NOT NULL DEFAULT 'v1.0';
