@@ -8,9 +8,10 @@ import { ComponentDialog } from '@/components/ComponentDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, CircuitBoard, Package, AlertTriangle, Download, Upload, ClipboardList } from 'lucide-react';
+import { Plus, Search, CircuitBoard, Package, AlertTriangle, Download, Upload, ClipboardList, ScanBarcode } from 'lucide-react';
 import { downloadCsv } from '@/lib/csv';
 import { CsvImportDialog } from '@/components/CsvImportDialog';
+import { BarcodeScanner } from '@/components/BarcodeScanner';
 import { Link } from 'react-router-dom';
 
 const Index = () => {
@@ -20,6 +21,7 @@ const Index = () => {
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [importOpen, setImportOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -153,6 +155,10 @@ const Index = () => {
             </Select>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setScannerOpen(true)} className="gap-1.5">
+              <ScanBarcode className="h-4 w-4" />
+              Scan
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setImportOpen(true)} className="gap-1.5">
               <Upload className="h-4 w-4" />
               Import
@@ -197,6 +203,12 @@ const Index = () => {
         open={importOpen}
         onOpenChange={setImportOpen}
         onImport={(items) => items.forEach(addComponent)}
+      />
+      <BarcodeScanner
+        open={scannerOpen}
+        onOpenChange={setScannerOpen}
+        components={components}
+        onEdit={handleEdit}
       />
     </div>
   );
