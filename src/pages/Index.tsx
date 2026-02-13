@@ -8,7 +8,7 @@ import { ComponentDialog } from '@/components/ComponentDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, CircuitBoard, Package, AlertTriangle, Download, Upload, ClipboardList, ScanBarcode } from 'lucide-react';
+import { Plus, Search, CircuitBoard, Package, AlertTriangle, Download, Upload, ClipboardList, ScanBarcode, Factory } from 'lucide-react';
 import { downloadCsv } from '@/lib/csv';
 import { CsvImportDialog } from '@/components/CsvImportDialog';
 import { BarcodeScanner } from '@/components/BarcodeScanner';
@@ -108,6 +108,9 @@ const Index = () => {
             <Link to="/bom" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               <ClipboardList className="h-4 w-4" /> Stücklisten
             </Link>
+            <Link to="/production" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <Factory className="h-4 w-4" /> Produktion
+            </Link>
           </nav>
           {/* Mobile stats */}
           <div className="flex sm:hidden items-center gap-2">
@@ -134,6 +137,10 @@ const Index = () => {
         <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
           <ClipboardList className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Stücklisten</span>
+        </Link>
+        <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <Factory className="h-5 w-5" />
+          <span className="font-display text-[10px] font-medium">Produktion</span>
         </Link>
         <button onClick={() => setScannerOpen(true)} className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
           <ScanBarcode className="h-5 w-5" />
