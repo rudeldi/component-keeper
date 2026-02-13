@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { ElectronicComponent } from '@/types/component';
 import { CATEGORIES } from '@/data/constants';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -93,6 +94,54 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
   const [deleteTarget, setDeleteTarget] = useState<ElectronicComponent | null>(null);
   const [stockTarget, setStockTarget] = useState<ElectronicComponent | null>(null);
 
+  // Fetch stock locations summary for all visible components
+  const [stockSummary, setStockSummary] = useState<Record<string, { count: number; locations: string[] }>>({});
+
+  useEffect(() => {
+    if (components.length === 0) return;
+    const ids = components.map(c => c.id);
+    supabase
+      .from('stock_locations')
+      .select('component_id, location, quantity')
+      .in('component_id', ids)
+      .then(({ data }) => {
+        if (!data) return;
+        const summary: Record<string, { count: number; locations: string[] }> = {};
+        for (const row of data as { component_id: string; location: string; quantity: number }[]) {
+          if (!summary[row.component_id]) summary[row.component_id] = { count: 0, locations: [] };
+          summary[row.component_id].count++;
+          if (row.location) summary[row.component_id].locations.push(`${row.location} (${row.quantity})`);
+        }
+        setStockSummary(summary);
+      });
+  }, [components]);
+
+  // Realtime refresh for stock_locations changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('stock-locations-summary')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_locations' }, () => {
+        if (components.length === 0) return;
+        const ids = components.map(c => c.id);
+        supabase
+          .from('stock_locations')
+          .select('component_id, location, quantity')
+          .in('component_id', ids)
+          .then(({ data }) => {
+            if (!data) return;
+            const summary: Record<string, { count: number; locations: string[] }> = {};
+            for (const row of data as { component_id: string; location: string; quantity: number }[]) {
+              if (!summary[row.component_id]) summary[row.component_id] = { count: 0, locations: [] };
+              summary[row.component_id].count++;
+              if (row.location) summary[row.component_id].locations.push(`${row.location} (${row.quantity})`);
+            }
+            setStockSummary(summary);
+          });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [components]);
+
   if (components.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16">
@@ -129,13 +178,20 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
                     </Badge>
                     {comp.value && <span className="font-display text-xs text-accent-foreground">{comp.value}</span>}
                     {comp.package && <Badge variant="outline" className="font-display text-[10px]">{comp.package}</Badge>}
-                    {comp.location && <span className="text-[10px] text-muted-foreground">📍 {comp.location}</span>}
+                    {stockSummary[comp.id] ? (
+                      <span className="text-[10px] text-muted-foreground">📍 {stockSummary[comp.id].count} {stockSummary[comp.id].count === 1 ? 'Ort' : 'Orte'}</span>
+                    ) : comp.location ? (
+                      <span className="text-[10px] text-muted-foreground">📍 {comp.location}</span>
+                    ) : null}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <span className={`font-display text-lg font-bold ${isLow ? 'text-destructive' : 'text-foreground'}`}>
                     {comp.quantity}
                   </span>
+                  {stockSummary[comp.id] && stockSummary[comp.id].count > 0 && (
+                    <span className="text-[10px] text-muted-foreground font-display">{stockSummary[comp.id].count} Gebinde</span>
+                  )}
                   {isLow && (
                     <span className="flex items-center gap-0.5 text-destructive">
                       <AlertTriangle className="h-3 w-3" />
@@ -207,12 +263,21 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
                     <Badge variant="outline" className="font-display text-xs">{comp.package || '–'}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className={`font-display font-semibold ${isLow ? 'text-destructive' : 'text-foreground'}`}>
-                      {comp.quantity}
-                    </span>
-                    {isLow && <AlertTriangle className="ml-1 inline h-3.5 w-3.5 text-destructive" />}
+                    <div className="flex items-center justify-end gap-1.5">
+                      <span className={`font-display font-semibold ${isLow ? 'text-destructive' : 'text-foreground'}`}>
+                        {comp.quantity}
+                      </span>
+                      {stockSummary[comp.id] && stockSummary[comp.id].count > 0 && (
+                        <Badge variant="outline" className="font-display text-[10px] px-1.5">{stockSummary[comp.id].count}×</Badge>
+                      )}
+                      {isLow && <AlertTriangle className="inline h-3.5 w-3.5 text-destructive" />}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{comp.location || '–'}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {stockSummary[comp.id] && stockSummary[comp.id].locations.length > 0
+                      ? stockSummary[comp.id].locations.join(', ')
+                      : comp.location || '–'}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <Tooltip>
