@@ -7,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Pencil, Trash2, ExternalLink, AlertTriangle, ClipboardList } from 'lucide-react';
+import { Pencil, Trash2, ExternalLink, AlertTriangle, ClipboardList, Package } from 'lucide-react';
 import { useBomLists, useBomItems } from '@/hooks/useBom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from '@/hooks/use-toast';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { StockManagementDialog } from '@/components/StockManagementDialog';
 
 interface ComponentTableProps {
   components: ElectronicComponent[];
@@ -90,6 +91,7 @@ function AddToBomDialog({ component, open, onOpenChange }: {
 export function ComponentTable({ components, onEdit, onDelete }: ComponentTableProps) {
   const [bomTarget, setBomTarget] = useState<ElectronicComponent | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ElectronicComponent | null>(null);
+  const [stockTarget, setStockTarget] = useState<ElectronicComponent | null>(null);
 
   if (components.length === 0) {
     return (
@@ -143,6 +145,9 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
                 </div>
               </div>
               <div className="flex justify-end gap-1 mt-2 border-t border-border pt-2">
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={e => { e.stopPropagation(); setStockTarget(comp); }}>
+                  <Package className="h-4 w-4" />
+                </Button>
                 <Button size="icon" variant="ghost" className="h-8 w-8" onClick={e => { e.stopPropagation(); setBomTarget(comp); }}>
                   <ClipboardList className="h-4 w-4" />
                 </Button>
@@ -212,6 +217,14 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
                     <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <Tooltip>
                         <TooltipTrigger asChild>
+                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setStockTarget(comp)}>
+                            <Package className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Bestandsverwaltung</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
                           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setBomTarget(comp)}>
                             <ClipboardList className="h-4 w-4" />
                           </Button>
@@ -245,6 +258,11 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
         onConfirm={() => { if (deleteTarget) { onDelete(deleteTarget.id); setDeleteTarget(null); } }}
         title={`"${deleteTarget?.name}" löschen?`}
         description="Das Bauteil wird unwiderruflich gelöscht und aus allen Stücklisten entfernt."
+      />
+      <StockManagementDialog
+        component={stockTarget}
+        open={!!stockTarget}
+        onOpenChange={open => { if (!open) setStockTarget(null); }}
       />
     </>
   );
