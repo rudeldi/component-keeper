@@ -105,6 +105,7 @@ export type Database = {
           purchase_url: string | null
           quantity: number
           type: string
+          unit_price: number | null
           updated_at: string
           value: string | null
         }
@@ -123,6 +124,7 @@ export type Database = {
           purchase_url?: string | null
           quantity?: number
           type?: string
+          unit_price?: number | null
           updated_at?: string
           value?: string | null
         }
@@ -141,6 +143,7 @@ export type Database = {
           purchase_url?: string | null
           quantity?: number
           type?: string
+          unit_price?: number | null
           updated_at?: string
           value?: string | null
         }

@@ -29,6 +29,7 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
   const [barcode, setBarcode] = useState(initial?.barcode || '');
   const [datasheetUrl, setDatasheetUrl] = useState(initial?.datasheetUrl || '');
   const [purchaseUrl, setPurchaseUrl] = useState(initial?.purchaseUrl || '');
+  const [unitPrice, setUnitPrice] = useState(initial?.unitPrice?.toString() || '');
   const [manufacturer, setManufacturer] = useState(initial?.manufacturer || '');
   const [description, setDescription] = useState(initial?.description || '');
 
@@ -48,6 +49,7 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
       barcode: barcode.trim() || undefined,
       datasheetUrl: datasheetUrl.trim() || undefined,
       purchaseUrl: purchaseUrl.trim() || undefined,
+      unitPrice: unitPrice ? parseFloat(unitPrice) : undefined,
       manufacturer: manufacturer.trim() || undefined,
       description: description.trim() || undefined,
     });
@@ -116,7 +118,7 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label>Menge</Label>
               <Input type="number" min="0" value={quantity} onChange={e => setQuantity(e.target.value)} />
@@ -124,6 +126,10 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
             <div className="space-y-2">
               <Label>Mindestmenge</Label>
               <Input type="number" min="0" value={minQuantity} onChange={e => setMinQuantity(e.target.value)} placeholder="Optional" />
+            </div>
+            <div className="space-y-2">
+              <Label>Stückpreis (€)</Label>
+              <Input type="number" min="0" step="0.0001" value={unitPrice} onChange={e => setUnitPrice(e.target.value)} placeholder="0.00" />
             </div>
             <div className="col-span-2 sm:col-span-1 space-y-2">
               <Label>Lagerort</Label>

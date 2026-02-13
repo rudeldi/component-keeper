@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import {
   CircuitBoard, Package, ClipboardList, Factory, BarChart3,
-  AlertTriangle, Boxes, TrendingDown, ShoppingCart,
+  AlertTriangle, Boxes, TrendingDown, ShoppingCart, Euro,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -24,6 +24,7 @@ interface ComponentRow {
   min_quantity: number | null;
   value: string | null;
   purchase_url: string | null;
+  unit_price: number | null;
 }
 
 interface ProductionRun {
@@ -55,7 +56,7 @@ const StatsPage = () => {
 
   useEffect(() => {
     Promise.all([
-      supabase.from('components').select('id, name, category, quantity, min_quantity, value, purchase_url'),
+      supabase.from('components').select('id, name, category, quantity, min_quantity, value, purchase_url, unit_price'),
       supabase.from('production_runs').select('*').order('created_at', { ascending: false }).limit(10),
     ]).then(([compRes, prodRes]) => {
       if (compRes.data) setComponents(compRes.data as ComponentRow[]);
@@ -68,6 +69,7 @@ const StatsPage = () => {
   const totalStock = useMemo(() => components.reduce((s, c) => s + c.quantity, 0), [components]);
   const lowStock = useMemo(() => components.filter(c => c.min_quantity != null && c.quantity <= c.min_quantity), [components]);
   const totalProduced = useMemo(() => productions.reduce((s, p) => s + p.quantity, 0), [productions]);
+  const totalValue = useMemo(() => components.reduce((s, c) => s + (c.unit_price ? c.unit_price * c.quantity : 0), 0), [components]);
 
   // Category chart data
   const categoryData = useMemo(() => {
@@ -140,7 +142,7 @@ const StatsPage = () => {
         </h2>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
           <Card className="glow-primary">
             <CardHeader className="pb-2 pt-4 px-4">
               <CardTitle className="text-xs font-display text-muted-foreground flex items-center gap-1.5">
@@ -160,6 +162,20 @@ const StatsPage = () => {
             </CardHeader>
             <CardContent className="px-4 pb-4">
               <span className="font-display text-2xl md:text-3xl font-bold text-foreground">{totalStock.toLocaleString('de-DE')}</span>
+            </CardContent>
+          </Card>
+
+          <Card className="glow-primary">
+            <CardHeader className="pb-2 pt-4 px-4">
+              <CardTitle className="text-xs font-display text-muted-foreground flex items-center gap-1.5">
+                <Euro className="h-3.5 w-3.5" /> Lagerwert
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4">
+              <span className="font-display text-2xl md:text-3xl font-bold text-foreground">
+                {totalValue.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+              <span className="text-xs text-muted-foreground ml-1">€</span>
             </CardContent>
           </Card>
 

@@ -11,6 +11,7 @@ export interface ElectronicComponent {
   barcode?: string;
   datasheetUrl?: string;
   purchaseUrl?: string;
+  unitPrice?: number;
   manufacturer?: string;
   description?: string;
   createdAt: string;
