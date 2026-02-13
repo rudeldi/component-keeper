@@ -8,7 +8,9 @@ import { ComponentDialog } from '@/components/ComponentDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, CircuitBoard, Package, AlertTriangle } from 'lucide-react';
+import { Plus, Search, CircuitBoard, Package, AlertTriangle, Download, Upload } from 'lucide-react';
+import { downloadCsv } from '@/lib/csv';
+import { CsvImportDialog } from '@/components/CsvImportDialog';
 
 const Index = () => {
   const { components, addComponent, updateComponent, deleteComponent } = useComponents();
@@ -16,6 +18,7 @@ const Index = () => {
   const [editTarget, setEditTarget] = useState<ElectronicComponent | undefined>();
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [importOpen, setImportOpen] = useState(false);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -140,10 +143,20 @@ const Index = () => {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => setDialogOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Bauteil anlegen
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setImportOpen(true)} className="gap-1.5">
+              <Upload className="h-4 w-4" />
+              Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => downloadCsv(filteredComponents)} className="gap-1.5">
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+            <Button onClick={() => setDialogOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Bauteil anlegen
+            </Button>
+          </div>
         </section>
 
         {/* Active filter */}
@@ -164,12 +177,17 @@ const Index = () => {
         />
       </main>
 
-      {/* Dialog */}
+      {/* Dialogs */}
       <ComponentDialog
         open={dialogOpen}
         onOpenChange={handleDialogOpen}
         onSave={handleSave}
         initial={editTarget}
+      />
+      <CsvImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImport={(items) => items.forEach(addComponent)}
       />
     </div>
   );
