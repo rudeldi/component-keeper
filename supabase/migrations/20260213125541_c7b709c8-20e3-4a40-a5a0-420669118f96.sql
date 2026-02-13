@@ -1,0 +1,1 @@
+ALTER TABLE public.components ADD COLUMN unit_price NUMERIC(10,4) DEFAULT NULL;
