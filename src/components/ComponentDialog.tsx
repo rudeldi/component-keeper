@@ -28,6 +28,7 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
   const [location, setLocation] = useState(initial?.location || '');
   const [barcode, setBarcode] = useState(initial?.barcode || '');
   const [datasheetUrl, setDatasheetUrl] = useState(initial?.datasheetUrl || '');
+  const [purchaseUrl, setPurchaseUrl] = useState(initial?.purchaseUrl || '');
   const [manufacturer, setManufacturer] = useState(initial?.manufacturer || '');
   const [description, setDescription] = useState(initial?.description || '');
 
@@ -46,6 +47,7 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
       location: location.trim() || undefined,
       barcode: barcode.trim() || undefined,
       datasheetUrl: datasheetUrl.trim() || undefined,
+      purchaseUrl: purchaseUrl.trim() || undefined,
       manufacturer: manufacturer.trim() || undefined,
       description: description.trim() || undefined,
     });
@@ -142,6 +144,11 @@ export function ComponentDialog({ open, onOpenChange, onSave, initial }: Compone
           <div className="space-y-2">
             <Label>Datenblatt-URL</Label>
             <Input value={datasheetUrl} onChange={e => setDatasheetUrl(e.target.value)} placeholder="https://..." />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Nachkauf-Link</Label>
+            <Input value={purchaseUrl} onChange={e => setPurchaseUrl(e.target.value)} placeholder="https://mouser.com/..." />
           </div>
 
           <div className="space-y-2">
