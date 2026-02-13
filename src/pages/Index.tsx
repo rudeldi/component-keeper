@@ -8,9 +8,10 @@ import { ComponentDialog } from '@/components/ComponentDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, CircuitBoard, Package, AlertTriangle, Download, Upload } from 'lucide-react';
+import { Plus, Search, CircuitBoard, Package, AlertTriangle, Download, Upload, ClipboardList } from 'lucide-react';
 import { downloadCsv } from '@/lib/csv';
 import { CsvImportDialog } from '@/components/CsvImportDialog';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const { components, addComponent, updateComponent, deleteComponent } = useComponents();
@@ -98,6 +99,14 @@ const Index = () => {
               <span className="text-sm text-muted-foreground">Bauteile</span>
             </div>
           </div>
+          <nav className="flex items-center gap-1">
+            <Link to="/" className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-foreground">
+              <Package className="h-4 w-4 text-primary" /> Bauteile
+            </Link>
+            <Link to="/bom" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <ClipboardList className="h-4 w-4" /> Stücklisten
+            </Link>
+          </nav>
         </div>
       </header>
 
