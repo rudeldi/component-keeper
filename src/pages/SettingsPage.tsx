@@ -108,7 +108,7 @@ const SettingsPage = () => {
               Datenbankverbindung
             </CardTitle>
             <CardDescription>
-              Konfiguriere die Verbindung zu deiner eigenen Supabase-Datenbank. Lasse die Felder leer, um die Standard-Datenbank zu verwenden.
+              Verbinde dich mit einer Supabase-Datenbank – egal ob in der Cloud (z.B. supabase.co) oder lokal / im eigenen Netzwerk (z.B. selbst gehostetes Supabase). Lasse die Felder leer, um die Standard-Datenbank zu verwenden.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -123,10 +123,11 @@ const SettingsPage = () => {
               <Label htmlFor="supabase-url">Supabase URL</Label>
               <Input
                 id="supabase-url"
-                placeholder="https://xxxxx.supabase.co"
+                placeholder="https://xxxxx.supabase.co oder http://192.168.1.100:8000"
                 value={url}
                 onChange={e => setUrl(e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">Cloud, lokal oder im eigenen Netzwerk – jede erreichbare Supabase-Instanz wird unterstützt.</p>
             </div>
 
             <div className="space-y-2">
