@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { getSupabaseClient } from '@/lib/supabase-config';
 import { ElectronicComponent, ComponentCategory } from '@/types/component';
 
 export interface BomList {
@@ -70,6 +70,7 @@ function rowToBomItem(row: any): BomItem {
 export function useBomLists() {
   const [bomLists, setBomLists] = useState<BomList[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabase = useMemo(() => getSupabaseClient(), []);
 
   const fetchLists = useCallback(async () => {
     const { data } = await supabase
@@ -158,6 +159,7 @@ export function useBomLists() {
 export function useBomItems(bomId: string | null) {
   const [items, setItems] = useState<BomItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabase = useMemo(() => getSupabaseClient(), []);
 
   const fetchItems = useCallback(async () => {
     if (!bomId) { setItems([]); setLoading(false); return; }

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useMemo } from 'react';
+import { getSupabaseClient } from '@/lib/supabase-config';
 import { ElectronicComponent } from '@/types/component';
 import { CATEGORIES } from '@/data/constants';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -90,6 +90,7 @@ function AddToBomDialog({ component, open, onOpenChange }: {
 }
 
 export function ComponentTable({ components, onEdit, onDelete }: ComponentTableProps) {
+  const supabase = useMemo(() => getSupabaseClient(), []);
   const [bomTarget, setBomTarget] = useState<ElectronicComponent | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ElectronicComponent | null>(null);
   const [stockTarget, setStockTarget] = useState<ElectronicComponent | null>(null);

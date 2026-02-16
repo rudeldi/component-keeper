@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, FileText, AlertTriangle, Check } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase-config';
 
 interface BomCsvImportDialogProps {
   open: boolean;
@@ -36,6 +36,7 @@ function parseCsvLine(line: string): string[] {
 }
 
 export function BomCsvImportDialog({ open, onOpenChange }: BomCsvImportDialogProps) {
+  const supabase = useMemo(() => getSupabaseClient(), []);
   const [parsed, setParsed] = useState<ParsedBom | null>(null);
   const [fileName, setFileName] = useState('');
   const [importing, setImporting] = useState(false);

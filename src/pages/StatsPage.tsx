@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase-config';
 import { CATEGORIES } from '@/data/constants';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,6 +55,7 @@ const StatsPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const supabase = getSupabaseClient();
     Promise.all([
       supabase.from('components').select('id, name, category, quantity, min_quantity, value, purchase_url, unit_price'),
       supabase.from('production_runs').select('*').order('created_at', { ascending: false }).limit(10),
