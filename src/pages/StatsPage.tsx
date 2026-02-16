@@ -56,6 +56,7 @@ const StatsPage = () => {
 
   useEffect(() => {
     const supabase = getSupabaseClient();
+    if (!supabase) { setLoading(false); return; }
     Promise.all([
       supabase.from('components').select('id, name, category, quantity, min_quantity, value, purchase_url, unit_price'),
       supabase.from('production_runs').select('*').order('created_at', { ascending: false }).limit(10),

@@ -62,7 +62,7 @@ function getDefaultClient(): SupabaseClient<Database> {
   return defaultClient;
 }
 
-export function getSupabaseClient(): SupabaseClient<Database> {
+export function getSupabaseClient(): SupabaseClient<Database> | null {
   const { url, key } = getCustomConfig();
   
   // If custom config exists, always use it
@@ -83,6 +83,6 @@ export function getSupabaseClient(): SupabaseClient<Database> {
     return getDefaultClient();
   }
   
-  // On external hosts without custom config: throw
-  throw new Error('Keine Datenbankverbindung konfiguriert. Bitte unter Einstellungen konfigurieren.');
+  // On external hosts without custom config: return null
+  return null;
 }
