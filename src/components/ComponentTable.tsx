@@ -99,7 +99,7 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
   const [stockSummary, setStockSummary] = useState<Record<string, { count: number; locations: string[] }>>({});
 
   useEffect(() => {
-    if (components.length === 0) return;
+    if (components.length === 0 || !supabase) return;
     const ids = components.map(c => c.id);
     supabase
       .from('stock_locations')
@@ -115,10 +115,11 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
         }
         setStockSummary(summary);
       });
-  }, [components]);
+  }, [components, supabase]);
 
   // Realtime refresh for stock_locations changes
   useEffect(() => {
+    if (!supabase) return;
     const channel = supabase
       .channel('stock-locations-summary')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_locations' }, () => {
@@ -141,7 +142,7 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [components]);
+  }, [components, supabase]);
 
   if (components.length === 0) {
     return (

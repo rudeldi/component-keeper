@@ -48,6 +48,7 @@ const ProductionPage = () => {
   const [historyLoading, setHistoryLoading] = useState(true);
 
   const fetchHistory = useCallback(async () => {
+    if (!supabase) { setHistoryLoading(false); return; }
     const { data } = await supabase
       .from('production_runs')
       .select('*')
@@ -55,13 +56,13 @@ const ProductionPage = () => {
       .limit(50);
     if (data) setHistory(data as ProductionRun[]);
     setHistoryLoading(false);
-  }, []);
+  }, [supabase]);
 
   useEffect(() => { fetchHistory(); }, [fetchHistory]);
 
   // Fetch stock locations for all components in the BOM
   useEffect(() => {
-    if (items.length === 0) {
+    if (items.length === 0 || !supabase) {
       setComponentLocations({});
       setSelectedLocations({});
       return;
@@ -81,12 +82,11 @@ const ProductionPage = () => {
           map[cid].push({ id: loc.id, location: loc.location, quantity: loc.quantity });
         }
         setComponentLocations(map);
-        // Default all to "auto"
         const defaults: Record<string, string> = {};
         items.forEach(item => { defaults[item.id] = 'auto'; });
         setSelectedLocations(defaults);
       });
-  }, [items]);
+  }, [items, supabase]);
 
   const selectedBom = bomLists.find(b => b.id === selectedBomId);
 

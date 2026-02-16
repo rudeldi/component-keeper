@@ -55,6 +55,7 @@ export function useComponents() {
 
   // Migrate localStorage data once
   const migrateLocalStorage = useCallback(async () => {
+    if (!supabase) return;
     if (localStorage.getItem(MIGRATED_KEY)) return;
     try {
       const data = localStorage.getItem(STORAGE_KEY);
@@ -67,17 +68,18 @@ export function useComponents() {
     } catch {
       // silent fail
     }
-  }, []);
+  }, [supabase]);
 
   // Fetch all components
   const fetchComponents = useCallback(async () => {
+    if (!supabase) { setLoading(false); return; }
     const { data } = await supabase
       .from('components')
       .select('*')
       .order('created_at', { ascending: false });
     if (data) setComponents(data.map(rowToComponent));
     setLoading(false);
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     migrateLocalStorage().then(fetchComponents);
@@ -85,6 +87,7 @@ export function useComponents() {
 
   // Realtime subscription
   useEffect(() => {
+    if (!supabase) return;
     const channel = supabase
       .channel('components-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'components' }, () => {
@@ -92,9 +95,10 @@ export function useComponents() {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [fetchComponents]);
+  }, [supabase, fetchComponents]);
 
   const addComponent = useCallback(async (component: Omit<ElectronicComponent, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!supabase) return;
     const row = componentToRow(component);
     const { data } = await supabase.from('components').insert(row).select().single();
     if (data) {
@@ -102,9 +106,10 @@ export function useComponents() {
       setComponents(prev => [newComp, ...prev]);
       return newComp;
     }
-  }, []);
+  }, [supabase]);
 
   const updateComponent = useCallback(async (id: string, updates: Partial<ElectronicComponent>) => {
+    if (!supabase) return;
     const dbUpdates: Record<string, any> = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.category !== undefined) dbUpdates.category = updates.category;
@@ -125,12 +130,13 @@ export function useComponents() {
     setComponents(prev =>
       prev.map(c => c.id === id ? { ...c, ...updates, updatedAt: new Date().toISOString() } : c)
     );
-  }, []);
+  }, [supabase]);
 
   const deleteComponent = useCallback(async (id: string) => {
+    if (!supabase) return;
     await supabase.from('components').delete().eq('id', id);
     setComponents(prev => prev.filter(c => c.id !== id));
-  }, []);
+  }, [supabase]);
 
   return { components, loading, addComponent, updateComponent, deleteComponent };
 }

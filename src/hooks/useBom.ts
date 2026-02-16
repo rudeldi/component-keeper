@@ -73,19 +73,21 @@ export function useBomLists() {
   const supabase = useMemo(() => getSupabaseClient(), []);
 
   const fetchLists = useCallback(async () => {
+    if (!supabase) { setLoading(false); return; }
     const { data } = await supabase
       .from('bom_lists')
       .select('*')
       .order('created_at', { ascending: false });
     if (data) setBomLists(data.map(rowToBomList));
     setLoading(false);
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     fetchLists();
   }, [fetchLists]);
 
   useEffect(() => {
+    if (!supabase) return;
     const channel = supabase
       .channel('bom-lists-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bom_lists' }, () => {
@@ -93,9 +95,10 @@ export function useBomLists() {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [fetchLists]);
+  }, [supabase, fetchLists]);
 
   const addBomList = useCallback(async (name: string, description?: string, version?: string) => {
+    if (!supabase) return;
     const { data } = await supabase
       .from('bom_lists')
       .insert({ name, description: description || null, version: version || 'v1.0' })
@@ -106,9 +109,10 @@ export function useBomLists() {
       setBomLists(prev => [newList, ...prev]);
       return newList;
     }
-  }, []);
+  }, [supabase]);
 
   const updateBomList = useCallback(async (id: string, updates: { name?: string; description?: string; version?: string; schematicUrl?: string | null }) => {
+    if (!supabase) return;
     const dbUpdates: Record<string, any> = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.description !== undefined) dbUpdates.description = updates.description || null;
@@ -116,24 +120,24 @@ export function useBomLists() {
     if (updates.schematicUrl !== undefined) dbUpdates.schematic_url = updates.schematicUrl;
     await supabase.from('bom_lists').update(dbUpdates).eq('id', id);
     setBomLists(prev => prev.map(b => b.id === id ? { ...b, ...updates, updatedAt: new Date().toISOString() } : b));
-  }, []);
+  }, [supabase]);
 
   const deleteBomList = useCallback(async (id: string) => {
+    if (!supabase) return;
     await supabase.from('bom_lists').delete().eq('id', id);
     setBomLists(prev => prev.filter(b => b.id !== id));
-  }, []);
+  }, [supabase]);
 
   const duplicateBomList = useCallback(async (id: string, newVersion: string) => {
+    if (!supabase) return;
     const source = bomLists.find(b => b.id === id);
     if (!source) return;
-    // Create new list with new version
     const { data: newListData } = await supabase
       .from('bom_lists')
       .insert({ name: source.name, description: source.description || null, version: newVersion })
       .select()
       .single();
     if (!newListData) return;
-    // Copy all items
     const { data: sourceItems } = await supabase
       .from('bom_items')
       .select('*')
@@ -151,7 +155,7 @@ export function useBomLists() {
     const newList = rowToBomList(newListData);
     setBomLists(prev => [newList, ...prev]);
     return newList;
-  }, [bomLists]);
+  }, [supabase, bomLists]);
 
   return { bomLists, loading, addBomList, updateBomList, deleteBomList, duplicateBomList };
 }
@@ -162,7 +166,7 @@ export function useBomItems(bomId: string | null) {
   const supabase = useMemo(() => getSupabaseClient(), []);
 
   const fetchItems = useCallback(async () => {
-    if (!bomId) { setItems([]); setLoading(false); return; }
+    if (!bomId || !supabase) { setItems([]); setLoading(false); return; }
     const { data } = await supabase
       .from('bom_items')
       .select('*, components(*)')
@@ -170,14 +174,14 @@ export function useBomItems(bomId: string | null) {
       .order('created_at', { ascending: true });
     if (data) setItems(data.map(rowToBomItem));
     setLoading(false);
-  }, [bomId]);
+  }, [bomId, supabase]);
 
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
 
   useEffect(() => {
-    if (!bomId) return;
+    if (!bomId || !supabase) return;
     const channel = supabase
       .channel(`bom-items-${bomId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bom_items', filter: `bom_id=eq.${bomId}` }, () => {
@@ -185,10 +189,10 @@ export function useBomItems(bomId: string | null) {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [bomId, fetchItems]);
+  }, [bomId, supabase, fetchItems]);
 
   const addItem = useCallback(async (componentId: string, quantity: number, referenceDesignator?: string, note?: string) => {
-    if (!bomId) return;
+    if (!bomId || !supabase) return;
     const { data } = await supabase
       .from('bom_items')
       .insert({
@@ -203,21 +207,23 @@ export function useBomItems(bomId: string | null) {
     if (data) {
       setItems(prev => [...prev, rowToBomItem(data)]);
     }
-  }, [bomId]);
+  }, [bomId, supabase]);
 
   const updateItem = useCallback(async (id: string, updates: { quantity?: number; referenceDesignator?: string; note?: string }) => {
+    if (!supabase) return;
     const dbUpdates: Record<string, any> = {};
     if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
     if (updates.referenceDesignator !== undefined) dbUpdates.reference_designator = updates.referenceDesignator || null;
     if (updates.note !== undefined) dbUpdates.note = updates.note || null;
     await supabase.from('bom_items').update(dbUpdates).eq('id', id);
     setItems(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
-  }, []);
+  }, [supabase]);
 
   const removeItem = useCallback(async (id: string) => {
+    if (!supabase) return;
     await supabase.from('bom_items').delete().eq('id', id);
     setItems(prev => prev.filter(i => i.id !== id));
-  }, []);
+  }, [supabase]);
 
   return { items, loading, addItem, updateItem, removeItem, refetch: fetchItems };
 }
