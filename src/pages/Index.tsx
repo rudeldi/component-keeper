@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useComponents } from '@/hooks/useComponents';
+import { hasDatabaseConnection } from '@/lib/supabase-config';
 import { CATEGORIES } from '@/data/constants';
 import { ComponentCategory, ElectronicComponent } from '@/types/component';
 import { CategoryCard } from '@/components/CategoryCard';
@@ -159,6 +160,17 @@ const Index = () => {
       </nav>
 
       <main className="container py-4 md:py-8">
+        {!hasDatabaseConnection() && (
+          <div className="mb-6 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-center">
+            <p className="text-sm font-medium text-destructive mb-2">Keine Datenbankverbindung konfiguriert</p>
+            <p className="text-xs text-muted-foreground mb-3">Bitte konfiguriere deine eigene Supabase-Datenbank in den Einstellungen.</p>
+            <Link to="/settings">
+              <Button size="sm" variant="destructive" className="gap-1.5">
+                <Settings className="h-4 w-4" /> Einstellungen öffnen
+              </Button>
+            </Link>
+          </div>
+        )}
         {/* Category Grid */}
         <section className="mb-4 md:mb-8">
           <h2 className="mb-3 md:mb-4 font-display text-xs md:text-sm font-semibold uppercase tracking-widest text-muted-foreground">
