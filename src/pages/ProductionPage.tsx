@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useBomLists, useBomItems } from '@/hooks/useBom';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase-config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +28,7 @@ interface ProductionRun {
 }
 
 const ProductionPage = () => {
+  const supabase = useMemo(() => getSupabaseClient(), []);
   const { bomLists } = useBomLists();
   const [selectedBomId, setSelectedBomId] = useState<string | null>(null);
   const { items, loading: itemsLoading } = useBomItems(selectedBomId);

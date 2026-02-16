@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { getSupabaseClient } from '@/lib/supabase-config';
 
 export interface StockLocation {
   id: string;
@@ -24,6 +24,7 @@ export function useStockLocations(componentId: string | null) {
   const [locations, setLocations] = useState<StockLocation[]>([]);
   const [movements, setMovements] = useState<StockMovement[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabase = useMemo(() => getSupabaseClient(), []);
 
   const fetchLocations = useCallback(async () => {
     if (!componentId) return;

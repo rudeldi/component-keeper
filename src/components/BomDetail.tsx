@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Plus, Trash2, Download, Pencil, CheckCircle2, AlertTriangle, XCircle, ImagePlus, FileImage, X, ExternalLink } from 'lucide-react';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase-config';
 import { toast } from 'sonner';
 
 interface BomDetailProps {
@@ -47,6 +47,7 @@ function exportBomCsv(bom: BomList, items: BomItem[]) {
 }
 
 export function BomDetail({ bom, onBack }: BomDetailProps) {
+  const supabase = useMemo(() => getSupabaseClient(), []);
   const { items, addItem, updateItem, removeItem } = useBomItems(bom.id);
   const { updateBomList } = useBomLists();
   const { components } = useComponents();

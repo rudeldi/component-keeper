@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { getSupabaseClient } from '@/lib/supabase-config';
 import { ElectronicComponent, ComponentCategory } from '@/types/component';
 
 const STORAGE_KEY = 'electronic-components';
@@ -51,6 +51,7 @@ function componentToRow(c: Omit<ElectronicComponent, 'id' | 'createdAt' | 'updat
 export function useComponents() {
   const [components, setComponents] = useState<ElectronicComponent[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabase = useMemo(() => getSupabaseClient(), []);
 
   // Migrate localStorage data once
   const migrateLocalStorage = useCallback(async () => {
