@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CircuitBoard, Package, ClipboardList, Factory, BarChart3, Settings, Save, RotateCcw, CheckCircle2, Database } from 'lucide-react';
+import { CircuitBoard, Package, ClipboardList, Factory, BarChart3, Settings, Save, RotateCcw, CheckCircle2, Database, Wifi, WifiOff, Loader2 } from 'lucide-react';
 import { getCustomConfig, setCustomConfig, clearCustomConfig, hasCustomConfig } from '@/lib/supabase-config';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,6 +14,8 @@ const SettingsPage = () => {
   const [url, setUrl] = useState(existing.url);
   const [key, setKey] = useState(existing.key);
   const [saved, setSaved] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const { toast } = useToast();
 
   const handleSave = () => {
@@ -137,7 +140,40 @@ const SettingsPage = () => {
               />
             </div>
 
-            <div className="flex gap-2 pt-2">
+            {testResult === 'success' && (
+              <div className="flex items-center gap-2 rounded-md bg-green-500/10 px-3 py-2 text-sm text-green-600">
+                <Wifi className="h-4 w-4" />
+                Verbindung erfolgreich!
+              </div>
+            )}
+            {testResult === 'error' && (
+              <div className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <WifiOff className="h-4 w-4" />
+                Verbindung fehlgeschlagen. Bitte URL und Key prüfen.
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-2 flex-wrap">
+              <Button
+                variant="outline"
+                disabled={!url || !key || testing}
+                className="gap-1.5"
+                onClick={async () => {
+                  setTesting(true);
+                  setTestResult(null);
+                  try {
+                    const testClient = createClient(url, key);
+                    const { error } = await testClient.from('components').select('id').limit(1);
+                    setTestResult(error ? 'error' : 'success');
+                  } catch {
+                    setTestResult('error');
+                  }
+                  setTesting(false);
+                }}
+              >
+                {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
+                Verbindung testen
+              </Button>
               <Button onClick={handleSave} disabled={!url || !key} className="gap-1.5">
                 <Save className="h-4 w-4" /> Speichern
               </Button>
