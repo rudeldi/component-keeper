@@ -148,7 +148,7 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
     <div>
       <div className="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2 md:gap-3">
-          <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8 md:h-9 md:w-9">
+          <Button variant="ghost" size="icon" onClick={onBack} className="h-10 w-10">
             <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
           <div className="min-w-0">
@@ -272,10 +272,10 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
                     </div>
                   </div>
                   <div className="flex justify-end gap-1 mt-2 border-t border-border pt-2">
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(item)}>
+                    <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => openEdit(item)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                    <Button size="icon" variant="ghost" className="h-10 w-10 text-destructive hover:text-destructive"
                       onClick={() => setDeleteItemId(item.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -347,10 +347,10 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
                       <TableCell className="text-muted-foreground">{item.note || '–'}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(item)}>
+                          <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => openEdit(item)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                          <Button size="icon" variant="ghost" className="h-10 w-10 text-destructive hover:text-destructive"
                             onClick={() => setDeleteItemId(item.id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -367,7 +367,7 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
 
       {/* Add item dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)]">
           <DialogHeader>
             <DialogTitle className="font-display text-primary">Bauteil hinzufügen</DialogTitle>
           </DialogHeader>
@@ -409,7 +409,7 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
 
       {/* Edit item dialog */}
       <Dialog open={!!editItem} onOpenChange={open => { if (!open) setEditItem(null); }}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)]">
           <DialogHeader>
             <DialogTitle className="font-display text-primary">Position bearbeiten</DialogTitle>
           </DialogHeader>
@@ -446,7 +446,7 @@ export function BomDetail({ bom, onBack }: BomDetailProps) {
 
       {/* Schematic preview dialog */}
       <Dialog open={schematicPreview} onOpenChange={setSchematicPreview}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-3xl w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-primary flex items-center gap-2">
               <FileImage className="h-5 w-5" />

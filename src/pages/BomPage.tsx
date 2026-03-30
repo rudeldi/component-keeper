@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CircuitBoard, Plus, Pencil, Trash2, FileText, Download, Upload, ClipboardList, Package, Copy, Factory, BarChart3 } from 'lucide-react';
+import { CircuitBoard, Plus, Pencil, Trash2, FileText, Download, Upload, ClipboardList, Package, Copy, Factory, BarChart3, Settings } from 'lucide-react';
 import { BomDetail } from '@/components/BomDetail';
 import { BomCsvImportDialog } from '@/components/BomCsvImportDialog';
 import { Link, useLocation } from 'react-router-dom';
@@ -94,26 +94,33 @@ const BomPage = () => {
               <Link to="/stats" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 <BarChart3 className="h-4 w-4" /> Statistik
               </Link>
+              <Link to="/settings" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                <Settings className="h-4 w-4" /> Einstellungen
+              </Link>
             </nav>
           </div>
         </header>
         {/* Mobile bottom navigation */}
         <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
-          <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
             <Package className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Bauteile</span>
           </Link>
-          <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
+          <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-primary">
             <ClipboardList className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Stücklisten</span>
           </Link>
-          <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
             <Factory className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Produktion</span>
           </Link>
-          <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
             <BarChart3 className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Statistik</span>
+          </Link>
+          <Link to="/settings" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
+            <Settings className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Einstellungen</span>
           </Link>
         </nav>
         <main className="container py-4 md:py-8">
@@ -146,27 +153,34 @@ const BomPage = () => {
               <Link to="/stats" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 <BarChart3 className="h-4 w-4" /> Statistik
               </Link>
+              <Link to="/settings" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                <Settings className="h-4 w-4" /> Einstellungen
+              </Link>
             </nav>
         </div>
       </header>
 
       {/* Mobile bottom navigation */}
         <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
-          <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
             <Package className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Bauteile</span>
           </Link>
-          <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
+          <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-primary">
             <ClipboardList className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Stücklisten</span>
           </Link>
-          <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
             <Factory className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Produktion</span>
           </Link>
-          <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+          <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
             <BarChart3 className="h-5 w-5" />
             <span className="font-display text-[10px] font-medium">Statistik</span>
+          </Link>
+          <Link to="/settings" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
+            <Settings className="h-5 w-5" />
+            <span className="font-display text-[10px] font-medium">Einstellungen</span>
           </Link>
         </nav>
 
@@ -217,15 +231,15 @@ const BomPage = () => {
                     </span>
                   </div>
                   <div className="flex justify-end gap-1 mt-2 border-t border-border pt-2">
-                    <Button size="icon" variant="ghost" className="h-8 w-8"
+                    <Button size="icon" variant="ghost" className="h-10 w-10"
                       onClick={e => { e.stopPropagation(); handleDuplicate(bom); }}>
                       <Copy className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8"
+                    <Button size="icon" variant="ghost" className="h-10 w-10"
                       onClick={e => { e.stopPropagation(); handleEdit(bom); }}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                    <Button size="icon" variant="ghost" className="h-10 w-10 text-destructive hover:text-destructive"
                       onClick={e => { e.stopPropagation(); setDeleteId(bom.id); }}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -264,16 +278,16 @@ const BomPage = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                          <Button size="icon" variant="ghost" className="h-8 w-8"
+                          <Button size="icon" variant="ghost" className="h-10 w-10"
                             onClick={e => { e.stopPropagation(); handleDuplicate(bom); }}
                             title="Duplizieren">
                             <Copy className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8"
+                          <Button size="icon" variant="ghost" className="h-10 w-10"
                             onClick={e => { e.stopPropagation(); handleEdit(bom); }}>
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                          <Button size="icon" variant="ghost" className="h-10 w-10 text-destructive hover:text-destructive"
                             onClick={e => { e.stopPropagation(); setDeleteId(bom.id); }}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -289,7 +303,7 @@ const BomPage = () => {
       </main>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)]">
           <DialogHeader>
             <DialogTitle className="font-display text-primary">
               {editId ? 'Stückliste bearbeiten' : 'Neue Stückliste'}
@@ -320,7 +334,7 @@ const BomPage = () => {
 
       {/* Duplicate dialog */}
       <Dialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm w-[calc(100vw-2rem)]">
           <DialogHeader>
             <DialogTitle className="font-display text-primary">Stückliste duplizieren</DialogTitle>
           </DialogHeader>

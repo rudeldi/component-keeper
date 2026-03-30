@@ -145,11 +145,11 @@ export function StockManagementDialog({ component, open, onOpenChange }: StockMa
                         className="h-9 flex-1"
                       />
                       <div className="flex gap-1.5">
-                        <Button size="sm" variant="outline" className="flex-1 sm:flex-none gap-1 h-9"
+                        <Button size="sm" variant="outline" className="flex-1 sm:flex-none gap-1 h-11"
                           onClick={() => handleBook(loc.id, 'in')}>
                           <Plus className="h-3.5 w-3.5" /> Ein
                         </Button>
-                        <Button size="sm" variant="outline" className="flex-1 sm:flex-none gap-1 h-9 text-destructive hover:text-destructive"
+                        <Button size="sm" variant="outline" className="flex-1 sm:flex-none gap-1 h-11 text-destructive hover:text-destructive"
                           onClick={() => handleBook(loc.id, 'out')}>
                           <Minus className="h-3.5 w-3.5" /> Aus
                         </Button>

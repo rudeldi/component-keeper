@@ -121,7 +121,7 @@ export function BarcodeScanner({ open, onOpenChange, components, onEdit }: Barco
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)]">
         <DialogHeader>
           <DialogTitle className="font-display flex items-center gap-2 text-primary">
             <ScanBarcode className="h-5 w-5" />

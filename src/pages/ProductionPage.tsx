@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { CircuitBoard, Package, ClipboardList, Factory, AlertTriangle, CheckCircle2, History, Trash2, MapPin, BarChart3 } from 'lucide-react';
+import { CircuitBoard, Package, ClipboardList, Factory, AlertTriangle, CheckCircle2, History, Trash2, MapPin, BarChart3, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -214,26 +214,33 @@ const ProductionPage = () => {
             <Link to="/stats" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               <BarChart3 className="h-4 w-4" /> Statistik
             </Link>
+            <Link to="/settings" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <Settings className="h-4 w-4" /> Einstellungen
+            </Link>
           </nav>
         </div>
       </header>
 
       <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
-        <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+        <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
           <Package className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Bauteile</span>
         </Link>
-        <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+        <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
           <ClipboardList className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Stücklisten</span>
         </Link>
-        <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
+        <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-primary">
           <Factory className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Produktion</span>
         </Link>
-        <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+        <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
           <BarChart3 className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Statistik</span>
+        </Link>
+        <Link to="/settings" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
+          <Settings className="h-5 w-5" />
+          <span className="font-display text-[10px] font-medium">Einstellungen</span>
         </Link>
       </nav>
 
@@ -279,7 +286,7 @@ const ProductionPage = () => {
           {selectedBomId && !itemsLoading && hasItems && (
             <div className="space-y-3">
               <h3 className="text-sm font-medium">Bestandsprüfung ({quantity}× {selectedBom?.name})</h3>
-              <div className="rounded-lg border border-border overflow-hidden">
+              <div className="rounded-lg border border-border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
@@ -395,7 +402,7 @@ const ProductionPage = () => {
           {history.length === 0 && !historyLoading ? (
             <p className="text-sm text-muted-foreground">Noch keine Produktionsläufe vorhanden.</p>
           ) : (
-            <div className="rounded-lg border border-border overflow-hidden">
+            <div className="rounded-lg border border-border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
@@ -437,7 +444,7 @@ const ProductionPage = () => {
 
       {/* Confirm Dialog */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)]">
           <DialogHeader>
             <DialogTitle className="font-display text-primary">Produktion bestätigen</DialogTitle>
             <DialogDescription>

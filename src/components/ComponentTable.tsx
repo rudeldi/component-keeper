@@ -44,7 +44,7 @@ function AddToBomDialog({ component, open, onOpenChange }: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm w-[calc(100vw-2rem)]">
         <DialogHeader>
           <DialogTitle className="font-display text-primary">Zur Stückliste hinzufügen</DialogTitle>
         </DialogHeader>
@@ -210,16 +210,16 @@ export function ComponentTable({ components, onEdit, onDelete }: ComponentTableP
                 </div>
               </div>
               <div className="flex justify-end gap-1 mt-2 border-t border-border pt-2">
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={e => { e.stopPropagation(); setStockTarget(comp); }}>
+                <Button size="icon" variant="ghost" className="h-10 w-10" onClick={e => { e.stopPropagation(); setStockTarget(comp); }}>
                   <Package className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={e => { e.stopPropagation(); setBomTarget(comp); }}>
+                <Button size="icon" variant="ghost" className="h-10 w-10" onClick={e => { e.stopPropagation(); setBomTarget(comp); }}>
                   <ClipboardList className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={e => { e.stopPropagation(); onEdit(comp); }}>
+                <Button size="icon" variant="ghost" className="h-10 w-10" onClick={e => { e.stopPropagation(); onEdit(comp); }}>
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive"
+                <Button size="icon" variant="ghost" className="h-10 w-10 text-destructive hover:text-destructive"
                   onClick={e => { e.stopPropagation(); setDeleteTarget(comp); }}>
                   <Trash2 className="h-4 w-4" />
                 </Button>

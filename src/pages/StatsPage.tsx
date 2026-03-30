@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import {
   CircuitBoard, Package, ClipboardList, Factory, BarChart3,
-  AlertTriangle, Boxes, TrendingDown, ShoppingCart, Euro,
+  AlertTriangle, Boxes, TrendingDown, ShoppingCart, Euro, Settings,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -114,26 +114,33 @@ const StatsPage = () => {
             <Link to="/stats" className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-foreground">
               <BarChart3 className="h-4 w-4 text-primary" /> Statistik
             </Link>
+            <Link to="/settings" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <Settings className="h-4 w-4" /> Einstellungen
+            </Link>
           </nav>
         </div>
       </header>
 
       <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
-        <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+        <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
           <Package className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Bauteile</span>
         </Link>
-        <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+        <Link to="/bom" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
           <ClipboardList className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Stücklisten</span>
         </Link>
-        <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-muted-foreground">
+        <Link to="/production" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
           <Factory className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Produktion</span>
         </Link>
-        <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-primary">
+        <Link to="/stats" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-primary">
           <BarChart3 className="h-5 w-5" />
           <span className="font-display text-[10px] font-medium">Statistik</span>
+        </Link>
+        <Link to="/settings" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-muted-foreground">
+          <Settings className="h-5 w-5" />
+          <span className="font-display text-[10px] font-medium">Einstellungen</span>
         </Link>
       </nav>
 
@@ -144,7 +151,7 @@ const StatsPage = () => {
         </h2>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-8">
           <Card className="glow-primary">
             <CardHeader className="pb-2 pt-4 px-4">
               <CardTitle className="text-xs font-display text-muted-foreground flex items-center gap-1.5">
@@ -194,7 +201,7 @@ const StatsPage = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="col-span-2 sm:col-span-1">
             <CardHeader className="pb-2 pt-4 px-4">
               <CardTitle className="text-xs font-display text-muted-foreground flex items-center gap-1.5">
                 <Factory className="h-3.5 w-3.5" /> Produziert
@@ -294,7 +301,7 @@ const StatsPage = () => {
               {lowStock.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">Alle Bestände ausreichend ✓</p>
               ) : (
-                <div className="rounded-lg border border-border overflow-hidden">
+                <div className="rounded-lg border border-border overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="hover:bg-transparent">
@@ -341,7 +348,7 @@ const StatsPage = () => {
               {productions.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">Noch keine Produktionen</p>
               ) : (
-                <div className="rounded-lg border border-border overflow-hidden">
+                <div className="rounded-lg border border-border overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="hover:bg-transparent">
