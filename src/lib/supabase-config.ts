@@ -10,6 +10,13 @@ function isLovablePreview(): boolean {
   return host.includes('lovable.app') || host.includes('lovableproject.com') || host === 'localhost';
 }
 
+// Check if build-time env vars are available
+function hasEnvConfig(): boolean {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return !!(url && key);
+}
+
 export function getCustomConfig() {
   return {
     url: localStorage.getItem(STORAGE_KEY_URL) || '',
@@ -42,7 +49,7 @@ export function hasCustomConfig(): boolean {
 
 /** Returns true if the app has a usable database connection */
 export function hasDatabaseConnection(): boolean {
-  return hasCustomConfig() || isLovablePreview();
+  return hasCustomConfig() || isLovablePreview() || hasEnvConfig();
 }
 
 let customClient: SupabaseClient<Database> | null = null;
@@ -78,11 +85,11 @@ export function getSupabaseClient(): SupabaseClient<Database> | null {
   
   customClient = null;
 
-  // Only use default (Lovable) client on Lovable domains
-  if (isLovablePreview()) {
+  // Use env vars if available (works on any host, including local network)
+  if (isLovablePreview() || hasEnvConfig()) {
     return getDefaultClient();
   }
   
-  // On external hosts without custom config: return null
+  // No config available
   return null;
 }
