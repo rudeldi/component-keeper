@@ -79,7 +79,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen pcb-grid pb-20 md:pb-0">
+    <div className="min-h-screen pcb-grid pb-24 md:pb-0">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container flex items-center justify-between py-3 md:py-4">
@@ -135,7 +135,17 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Mobile bottom navigation */}
+
+      {/* Mobile FAB: Barcode Scanner */}
+      <button
+        onClick={() => setScannerOpen(true)}
+        className="fixed bottom-20 right-4 z-50 flex md:hidden h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform active:scale-95"
+        aria-label="Barcode scannen"
+      >
+        <ScanBarcode className="h-6 w-6" />
+      </button>
+
+      {/* Mobile bottom navigation */
       <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
         <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-primary">
           <Package className="h-5 w-5" />
