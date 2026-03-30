@@ -93,8 +93,13 @@ const UpdateCard = () => {
 
   const shortHash = (h: string) => h.slice(0, 7);
   const formatDate = (d: string) => {
-    try { return new Date(d).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }); }
-    catch { return d; }
+    try {
+      // Normalize git date formats: "2026-03-30 20:11:19 +0000" → "2026-03-30T20:11:19+0000"
+      const iso = d.trim().replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{2}:?\d{2})$/, '$1T$2$3');
+      const date = new Date(iso);
+      if (isNaN(date.getTime())) return d;
+      return date.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
+    } catch { return d; }
   };
 
   return (
