@@ -1,14 +1,194 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CircuitBoard, Package, ClipboardList, Factory, BarChart3, Settings, Save, RotateCcw, CheckCircle2, Database, Wifi, WifiOff, Loader2 } from 'lucide-react';
+import { CircuitBoard, Package, ClipboardList, Factory, BarChart3, Settings, Save, RotateCcw, CheckCircle2, Database, Wifi, WifiOff, Loader2, RefreshCw, Download, AlertCircle, GitCommit } from 'lucide-react';
 import { getCustomConfig, setCustomConfig, clearCustomConfig, hasCustomConfig } from '@/lib/supabase-config';
 import { useToast } from '@/hooks/use-toast';
 
+// ─── Update-Status Typen ───────────────────────────────────────────────────
+interface UpdateStatus {
+  deployed: string;
+  latest: string;
+  upToDate: boolean;
+  isUpdating: boolean;
+  deployedDate: string;
+}
+
+// ─── Update-Karte (nur sichtbar wenn /api/update erreichbar) ──────────────
+const UpdateCard = () => {
+  const [status, setStatus] = useState<UpdateStatus | null>(null);
+  const [available, setAvailable] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const fetchStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/update/status', { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: UpdateStatus = await res.json();
+      setStatus(data);
+      setAvailable(true);
+      setError(null);
+      return data;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // Beim Laden prüfen ob Update-API erreichbar
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
+
+  // Polling während Update läuft
+  useEffect(() => {
+    if (!status?.isUpdating) return;
+    const interval = setInterval(async () => {
+      const data = await fetchStatus();
+      if (data && !data.isUpdating) {
+        clearInterval(interval);
+        toast({
+          title: 'Update abgeschlossen ✓',
+          description: 'Die Seite wird in 3 Sekunden neu geladen.',
+        });
+        setTimeout(() => window.location.reload(), 3000);
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [status?.isUpdating, fetchStatus, toast]);
+
+  const handleCheck = async () => {
+    setChecking(true);
+    setError(null);
+    const data = await fetchStatus();
+    if (!data) setError('Update-Server nicht erreichbar.');
+    setChecking(false);
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const res = await fetch('/api/update/start', { method: 'POST' });
+      if (!res.ok) throw new Error();
+      // Optimistisch: isUpdating auf true setzen
+      setStatus(prev => prev ? { ...prev, isUpdating: true } : prev);
+      toast({
+        title: 'Update gestartet',
+        description: 'Das Update wird im Hintergrund installiert. Bitte warten…',
+      });
+    } catch {
+      toast({
+        title: 'Fehler',
+        description: 'Update konnte nicht gestartet werden.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  if (!available) return null;
+
+  const shortHash = (h: string) => h.slice(0, 7);
+  const formatDate = (d: string) => {
+    try { return new Date(d).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }); }
+    catch { return d; }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <RefreshCw className="h-5 w-5 text-primary" />
+          Software-Update
+        </CardTitle>
+        <CardDescription>
+          Prüfe auf neue Versionen und installiere Updates direkt aus den Einstellungen.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+
+        {/* Versionsstatus */}
+        {status && (
+          <div className="rounded-md border border-border bg-secondary/30 p-3 space-y-2 text-sm">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-muted-foreground flex items-center gap-1.5">
+                <GitCommit className="h-3.5 w-3.5" /> Installiert
+              </span>
+              <span className="font-mono text-xs">{shortHash(status.deployed)}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-muted-foreground flex items-center gap-1.5">
+                <GitCommit className="h-3.5 w-3.5" /> Verfügbar
+              </span>
+              <span className="font-mono text-xs">{shortHash(status.latest)}</span>
+            </div>
+            {status.deployedDate && (
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-muted-foreground">Stand</span>
+                <span className="text-xs">{formatDate(status.deployedDate)}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Update-Banner */}
+        {status && status.upToDate && !status.isUpdating && (
+          <div className="flex items-center gap-2 rounded-md bg-green-500/10 px-3 py-2 text-sm text-green-600">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            App ist aktuell
+          </div>
+        )}
+        {status && !status.upToDate && !status.isUpdating && (
+          <div className="flex items-center gap-2 rounded-md bg-yellow-500/10 px-3 py-2 text-sm text-yellow-600">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            Update verfügbar — Commit {shortHash(status.latest)}
+          </div>
+        )}
+        {status?.isUpdating && (
+          <div className="flex items-center gap-2 rounded-md bg-primary/10 px-3 py-2 text-sm text-primary">
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+            Update wird installiert… bitte warten
+          </div>
+        )}
+
+        {error && (
+          <div className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <WifiOff className="h-4 w-4 shrink-0" />
+            {error}
+          </div>
+        )}
+
+        {/* Aktions-Buttons */}
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={handleCheck}
+            disabled={checking || status?.isUpdating}
+            className="gap-1.5"
+          >
+            {checking
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : <RefreshCw className="h-4 w-4" />}
+            Prüfen
+          </Button>
+
+          {status && !status.upToDate && !status.isUpdating && (
+            <Button onClick={handleUpdate} className="gap-1.5">
+              <Download className="h-4 w-4" />
+              Update installieren
+            </Button>
+          )}
+        </div>
+
+      </CardContent>
+    </Card>
+  );
+};
+
+// ─── Haupt-Seite ──────────────────────────────────────────────────────────
 const SettingsPage = () => {
   const existing = getCustomConfig();
   const [url, setUrl] = useState(existing.url);
@@ -96,11 +276,12 @@ const SettingsPage = () => {
         </Link>
       </nav>
 
-      <main className="container py-6 md:py-10 max-w-2xl">
-        <h2 className="font-display text-2xl font-bold mb-6 flex items-center gap-2">
+      <main className="container py-6 md:py-10 max-w-2xl space-y-6">
+        <h2 className="font-display text-2xl font-bold flex items-center gap-2">
           <Settings className="h-6 w-6 text-primary" /> Einstellungen
         </h2>
 
+        {/* Datenbankverbindung */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -184,6 +365,10 @@ const SettingsPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Software-Update (nur sichtbar wenn Update-Server erreichbar) */}
+        <UpdateCard />
+
       </main>
     </div>
   );
