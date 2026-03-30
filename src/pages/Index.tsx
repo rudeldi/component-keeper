@@ -145,7 +145,7 @@ const Index = () => {
         <ScanBarcode className="h-6 w-6" />
       </button>
 
-      {/* Mobile bottom navigation */
+      {/* Mobile bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-border bg-background/95 backdrop-blur-md">
         <Link to="/" className="flex flex-1 flex-col items-center gap-0.5 py-3 text-primary">
           <Package className="h-5 w-5" />
