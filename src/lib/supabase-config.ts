@@ -47,13 +47,28 @@ export function hasCustomConfig(): boolean {
   return !!(url && key);
 }
 
+// When served over HTTPS locally (e.g. bauteilserver.local), Supabase is proxied
+// via the same origin at /supabase — no manual configuration needed.
+function isHttpsLocal(): boolean {
+  return window.location.protocol === 'https:' && !isLovablePreview();
+}
+
+function getHttpsLocalClient(): SupabaseClient<Database> {
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const proxyUrl = `${window.location.origin}/supabase`;
+  return createClient<Database>(proxyUrl, key, {
+    auth: { storage: localStorage, persistSession: true, autoRefreshToken: true },
+  });
+}
+
 /** Returns true if the app has a usable database connection */
 export function hasDatabaseConnection(): boolean {
-  return hasCustomConfig() || isLovablePreview() || hasEnvConfig();
+  return hasCustomConfig() || isLovablePreview() || isHttpsLocal() || hasEnvConfig();
 }
 
 let customClient: SupabaseClient<Database> | null = null;
 let defaultClient: SupabaseClient<Database> | null = null;
+let httpsLocalClient: SupabaseClient<Database> | null = null;
 
 function getDefaultClient(): SupabaseClient<Database> {
   if (!defaultClient) {
@@ -71,8 +86,8 @@ function getDefaultClient(): SupabaseClient<Database> {
 
 export function getSupabaseClient(): SupabaseClient<Database> | null {
   const { url, key } = getCustomConfig();
-  
-  // If custom config exists, always use it
+
+  // 1. Custom config (user-set via Settings page) — always takes precedence
   if (url && key) {
     if (!customClient || (customClient as any).supabaseUrl !== url) {
       customClient = createClient<Database>(url, key, {
@@ -82,14 +97,22 @@ export function getSupabaseClient(): SupabaseClient<Database> | null {
     }
     return customClient;
   }
-  
+
   customClient = null;
 
-  // Use env vars if available (works on any host, including local network)
-  if (isLovablePreview() || hasEnvConfig()) {
+  // 2. Lovable preview or direct env config (HTTP)
+  if (isLovablePreview() || (!isHttpsLocal() && hasEnvConfig())) {
     return getDefaultClient();
   }
-  
+
+  // 3. HTTPS local — proxy Supabase via /supabase on the same origin (automatic)
+  if (isHttpsLocal() && hasEnvConfig()) {
+    if (!httpsLocalClient) {
+      httpsLocalClient = getHttpsLocalClient();
+    }
+    return httpsLocalClient;
+  }
+
   // No config available
   return null;
 }
