@@ -1,73 +1,225 @@
-# Welcome to your Lovable project
+# BauteilVerwaltung
 
-## Project info
+Eine lokale Verwaltungs-App für elektronische Bauteile — mit Stücklisten, Lagerverwaltung und Produktionsplanung.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Gebaut mit **Vite · React · TypeScript · Tailwind CSS · shadcn/ui · Supabase**.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Voraussetzungen
 
-**Use Lovable**
+| Tool | Version | Installation |
+|------|---------|-------------|
+| Node.js | ≥ 20 | [nodejs.org](https://nodejs.org) |
+| Docker | aktuell | [docker.com](https://docs.docker.com/get-docker/) |
+| Supabase CLI | aktuell | [supabase.com/docs/guides/cli](https://supabase.com/docs/guides/cli) |
+| Git | aktuell | [git-scm.com](https://git-scm.com) |
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## Installation
 
-**Use your preferred IDE**
+### 1. Repository klonen
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```bash
+git clone <REPO_URL>
+cd <REPO_NAME>
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 2. Umgebungsvariablen einrichten
 
-Follow these steps:
+```bash
+cp .env.example .env
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Öffne `.env` und trage deine Supabase-Zugangsdaten ein (siehe Abschnitt [Supabase einrichten](#supabase-einrichten)).
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+> ⚠️ **Wichtig:** Die `.env`-Datei niemals in Git committen — sie ist bereits in `.gitignore` eingetragen.
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 3. Abhängigkeiten installieren
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
+```
+
+### 4. Supabase einrichten
+
+#### Option A — Lokal (empfohlen für Self-Hosting)
+
+```bash
+supabase start
+```
+
+Nach dem Start zeigt die CLI deine lokalen Zugangsdaten:
+
+```
+API URL:     http://127.0.0.1:54321
+Publishable: sb_publishable_...
+```
+
+Trage diese Werte in deine `.env` ein:
+
+```env
+VITE_SUPABASE_URL=http://127.0.0.1:54321
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+Alle Datenbank-Migrationen werden beim Start automatisch angewendet.
+
+#### Option B — Supabase Cloud
+
+1. Neues Projekt auf [supabase.com](https://supabase.com) anlegen
+2. Unter **Project Settings → API** die URL und den `anon`-Key kopieren
+3. In `.env` eintragen:
+
+```env
+VITE_SUPABASE_URL=https://<project-id>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=<anon-key>
+```
+
+4. Migrationen ausführen:
+
+```bash
+supabase db push
+```
+
+### 5. App starten
+
+#### Entwicklung
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Die App ist unter `http://localhost:5173` erreichbar.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+#### Produktion (Self-Hosting mit Docker + Caddy)
 
-**Use GitHub Codespaces**
+Erstelle im übergeordneten Verzeichnis folgende Struktur:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+hosting/
+├── app/              ← dieses Repository (geklont)
+├── dist/             ← wird beim Build befüllt
+├── caddy/
+│   └── Caddyfile
+└── docker-compose.yml
+```
 
-## What technologies are used for this project?
+**`caddy/Caddyfile`** — ersetze `SERVER_IP` mit der IP-Adresse deines Servers:
 
-This project is built with:
+```
+http://SERVER_IP {
+  root * /srv
+  file_server
+  encode zstd gzip
+  try_files {path} /index.html
+}
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+**`docker-compose.yml`**:
 
-## How can I deploy this project?
+```yaml
+services:
+  build:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./app:/app
+      - ./dist:/app/dist
+    command: sh -c "npm ci && npm run build"
+    profiles: ["build"]
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./dist:/srv:ro
+      - caddy_data:/data
+      - caddy_config:/config
 
-## Can I connect a custom domain to my Lovable project?
+volumes:
+  caddy_data:
+  caddy_config:
+```
 
-Yes, you can!
+**App bauen und starten:**
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```bash
+# Frontend bauen
+docker compose run --rm build
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# Caddy starten
+docker compose up -d caddy
+```
+
+Die App ist unter `http://SERVER_IP` erreichbar.
+
+**Update nach Code-Änderungen:**
+
+```bash
+git pull
+docker compose run --rm build
+```
+
+---
+
+## Supabase beim Systemstart automatisch starten
+
+Alle Supabase-Container laufen mit der Docker-Restart-Policy `unless-stopped` und starten automatisch mit dem Docker-Daemon. Stelle sicher, dass Docker beim Systemstart aktiviert ist:
+
+```bash
+# Linux (systemd)
+sudo systemctl enable docker
+
+# Supabase einmalig starten (danach automatisch)
+supabase start
+```
+
+---
+
+## Projektstruktur
+
+```
+src/
+├── components/          UI-Komponenten (shadcn/ui)
+├── hooks/               React Query Hooks für Datenbankzugriffe
+├── integrations/
+│   └── supabase/        Generierter Client & TypeScript-Typen
+├── lib/
+│   └── supabase-config.ts   Verbindungslogik (env vars / localStorage)
+└── pages/               Seiten (Bauteile, Stücklisten, Produktion, …)
+
+supabase/
+├── config.toml          Supabase CLI Konfiguration
+└── migrations/          Datenbankschema (wird automatisch angewendet)
+```
+
+---
+
+## Datenbank-Schema
+
+| Tabelle | Beschreibung |
+|---------|-------------|
+| `components` | Bauteile mit Eigenschaften & Bestand |
+| `stock_locations` | Lagerorte pro Bauteil |
+| `stock_movements` | Bestandsbewegungen (Ein-/Ausgang) |
+| `bom_lists` | Stücklisten |
+| `bom_items` | Positionen einer Stückliste |
+| `production_runs` | Produktionsdurchläufe |
+
+---
+
+## Entwicklung mit Lovable
+
+Das Projekt wurde mit [Lovable](https://lovable.dev) erstellt. Änderungen in Lovable werden automatisch in dieses Repository gepusht.
+
+Lokale Änderungen zurück zu Lovable bringen:
+
+```bash
+git push origin main
+```
